@@ -5,22 +5,17 @@ import csv
 import os
 
 def tela_funcionarios(janela):
-    # Limpar tela anterior
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
             widget.destroy()
 
-    # Frame principal
-    frame = tk.Frame(janela, bg="#f0f5f5")
+    frame = tk.Frame(janela, bg="#e6f2ff")
     frame.pack(fill="both", expand=True)
 
-    # Título
-    titulo = tk.Label(frame, text="Cadastro de Funcionários 👨‍🍳", font=("Helvetica", 18, "bold"),
-                      bg="#f0f5f5", fg="#003d33")
-    titulo.pack(pady=10)
+    tk.Label(frame, text="Cadastro de Funcionários 👨‍🍳", font=("Helvetica", 18, "bold"),
+             bg="#e6f2ff", fg="#006699").pack(pady=10)
 
-    # Sub-frame dos campos
-    campos_frame = tk.Frame(frame, bg="#f0f5f5")
+    campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
     campos = {
@@ -34,16 +29,15 @@ def tela_funcionarios(janela):
         "Endereço": tk.Entry(campos_frame, width=30)
     }
 
-    linha = 0
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        coluna = i % 2
         linha = i // 2
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0f5f5") \
-            .grid(row=linha, column=coluna*2, padx=5, pady=5, sticky="e")
-        entrada.grid(row=linha, column=coluna*2 + 1, padx=5, pady=5, sticky="w")
+        coluna = (i % 2) * 2
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
+            .grid(row=linha, column=coluna, padx=8, pady=6, sticky="e")
+        entrada.grid(row=linha, column=coluna + 1, padx=8, pady=6, sticky="w")
 
     def salvar_funcionario():
-        dados = [entrada.get() for entrada in campos.values()]
+        dados = [entrada.get().strip() for entrada in campos.values()]
         if all(dados):
             os.makedirs("dados", exist_ok=True)
             with open("dados/funcionarios.txt", "a", encoding="utf-8") as arq:
@@ -67,33 +61,34 @@ def tela_funcionarios(janela):
         except FileNotFoundError:
             messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
 
-    # Frame dos botões
-    botoes_frame = tk.Frame(frame, bg="#f0f5f5")
+    botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
-    tk.Button(botoes_frame, text="Salvar Funcionário 💾", bg="#339966", fg="white",
-              font=("Helvetica", 12, "bold"), command=salvar_funcionario).pack(side="left", padx=10)
+    tk.Button(botoes_frame, text="💾 Salvar Funcionário", bg="#339966", fg="white",
+              font=("Helvetica", 12, "bold"), width=20, command=salvar_funcionario).pack(side="left", padx=10)
 
-    tk.Button(botoes_frame, text="Exportar dados 📁", bg="#0059b3", fg="white",
-              font=("Helvetica", 12, "bold"), command=exportar_csv).pack(side="left", padx=10)
+    tk.Button(botoes_frame, text="📁 Exportar dados", bg="#0059b3", fg="white",
+              font=("Helvetica", 12, "bold"), width=20, command=exportar_csv).pack(side="left", padx=10)
 
-    # --- Tabela com Scroll ---
-    tabela_frame = tk.Frame(frame)
-    tabela_frame.pack(pady=10)
+    tabela_frame = tk.LabelFrame(frame, text="📋 Funcionários Cadastrados", bg="#e6f2ff",
+                                 font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
+    tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
 
     colunas = tuple(campos.keys())
-
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=10)
+    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
 
     for col in colunas:
         tabela.heading(col, text=col)
-        tabela.column(col, width=120, anchor="center")
+        tabela.column(col, width=130, anchor="center")
 
     scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
     tabela.configure(yscrollcommand=scroll.set)
 
-    tabela.grid(row=0, column=0)
-    scroll.grid(row=0, column=1, sticky="ns")
+    tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
+    scroll.grid(row=0, column=1, sticky="ns", pady=8)
+
+    tabela_frame.grid_rowconfigure(0, weight=1)
+    tabela_frame.grid_columnconfigure(0, weight=1)
 
     def carregar_funcionarios():
         tabela.delete(*tabela.get_children())

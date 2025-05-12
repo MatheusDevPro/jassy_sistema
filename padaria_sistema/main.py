@@ -29,7 +29,7 @@ def placeholder():
 
 janela = tk.Tk()
 janela.title("🍞 Jassy - Gestão")
-janela.geometry("1000x650")
+janela.geometry("1000x750")
 janela.configure(bg="#f8f8ff")
 
 menu_bar = tk.Menu(janela)
@@ -90,7 +90,7 @@ menu_bar.add_cascade(label="📈 Relatórios", menu=menu_relatorios)
 
 # ⚙️ Administração
 menu_admin = tk.Menu(menu_bar, tearoff=0)
-menu_admin.add_command(label="🛠️ Parâmetros do Sistema", command=placeholder)
+menu_admin.add_command(label="🛠️Parâmetros do Sistema", command=placeholder)
 menu_admin.add_command(label="💾 Backup / Restauração", command=placeholder)
 menu_admin.add_command(label="🔐 Permissões de Acesso", command=placeholder)
 menu_admin.add_command(label="🎨 Personalização da Interface", command=placeholder)

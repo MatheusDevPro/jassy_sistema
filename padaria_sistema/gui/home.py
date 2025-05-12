@@ -21,8 +21,16 @@ def mostrar_home(janela):
     canvas = tk.Canvas(frame, width=500, height=300, bg="#ffffff", bd=2, relief="ridge")
     canvas.pack(pady=30)
 
-    # Painel central (representa sistema)
-    canvas.create_rectangle(100, 60, 400, 220, fill="#e8f8f5", outline="#2e86c1", width=2)
+    # Criando "retângulo" com cantos arredondados usando círculos nos cantos
+    canvas.create_oval(100, 60, 120, 80, fill="#2980b9", outline="#2980b9")  # canto superior esquerdo
+    canvas.create_oval(380, 60, 400, 80, fill="#2980b9", outline="#2980b9")  # canto superior direito
+    canvas.create_oval(100, 200, 120, 220, fill="#2980b9", outline="#2980b9")  # canto inferior esquerdo
+    canvas.create_oval(380, 200, 400, 220, fill="#2980b9", outline="#2980b9")  # canto inferior direito
+
+    # Criando o corpo do "retângulo"
+    canvas.create_rectangle(120, 60, 380, 220, fill="#ecf0f1", outline="#2980b9", width=2)
+
+    # Título do painel
     canvas.create_text(250, 80, text="Painel de Gestão", font=("Helvetica", 14, "bold"), fill="#2e4053")
 
     # Gráficos (barras)
@@ -43,4 +51,3 @@ def mostrar_home(janela):
 
     # Pequeno texto inferior
     canvas.create_text(250, 240, text="Representação gráfica da gestão integrada", font=("Helvetica", 10), fill="#888")
-

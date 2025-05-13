@@ -20,6 +20,15 @@ from gui.contas_a_receber import tela_contas_a_receber
 from gui.conciliacao_bancaria import tela_conciliacao_bancaria
 from gui.demonstrativo_de_lucros import tela_demonstrativo_lucros
 from gui.boleto import tela_emissao_boletos
+from gui.emissao_nf import tela_emissao_nf
+from gui.boletos_emitidos import tela_boletos_emitidos
+from gui.notas_emitidas import tela_notas_emitidas
+from gui.relatorio_vendas import tela_relatorio_vendas
+from gui.relatorio_produtos_mais_vendidos import tela_produtos_mais_vendidos
+from gui.relatorio_clientes import tela_relatorio_clientes
+from gui.relatorio_estoque import tela_relatorio_estoque
+from gui.relatorios_personalizados import tela_relatorios_personalizados
+
 
 
 
@@ -74,18 +83,18 @@ menu_bar.add_cascade(label="💰 Financeiro", menu=menu_financeiro)
 #faturamento
 menu_faturamento = tk.Menu(menu_bar, tearoff=0)
 menu_faturamento.add_command(label="📄 Emissão de Boletos", command=lambda: tela_emissao_boletos(janela))
-menu_faturamento.add_command(label="📄 Emissão de Notas fiscais", command=placeholder)
-menu_faturamento.add_command(label="📄 Boletos emitidos", command=placeholder)
-menu_faturamento.add_command(label="📄 Notas Fiscais emitidas", command=placeholder)
+menu_faturamento.add_command(label="📄 Emissão de Notas fiscais", command=lambda: tela_emissao_nf(janela))
+menu_faturamento.add_command(label="📄 Boletos emitidos", command=lambda: tela_boletos_emitidos(janela))
+menu_faturamento.add_command(label="📄 Notas Fiscais emitidas", command=lambda: tela_notas_emitidas(janela))
 menu_bar.add_cascade(label="💰 Faturamento", menu=menu_faturamento)
 
 # 📈 Relatórios
 menu_relatorios = tk.Menu(menu_bar, tearoff=0)
-menu_relatorios.add_command(label="📈 Relatório de Vendas", command=placeholder)
-menu_relatorios.add_command(label="🔥 Produtos Mais Vendidos", command=placeholder)
-menu_relatorios.add_command(label="📊 Relatório de Clientes", command=placeholder)
-menu_relatorios.add_command(label="📦 Relatório de Estoque", command=placeholder)
-menu_relatorios.add_command(label="🧾 Relatórios Personalizados", command=placeholder)
+menu_relatorios.add_command(label="📈 Relatório de Vendas", command=lambda: tela_relatorio_vendas(janela))
+menu_relatorios.add_command(label="🔥 Produtos Mais Vendidos", command=lambda: tela_produtos_mais_vendidos(janela))
+menu_relatorios.add_command(label="📊 Relatório de Clientes", command=lambda: tela_relatorio_clientes(janela))
+menu_relatorios.add_command(label="📦 Relatório de Estoque", command=lambda: tela_relatorio_estoque(janela))
+menu_relatorios.add_command(label="🧾 Relatórios Personalizados", command=lambda: tela_relatorios_personalizados(janela))
 menu_bar.add_cascade(label="📈 Relatórios", menu=menu_relatorios)
 
 # ⚙️ Administração

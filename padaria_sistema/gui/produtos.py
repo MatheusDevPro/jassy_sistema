@@ -3,6 +3,8 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+import re
+from tkcalendar import DateEntry  # calendário
 
 def tela_produtos(janela):
     for widget in janela.winfo_children():
@@ -18,15 +20,18 @@ def tela_produtos(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
+    categorias = ["Alimentos", "Bebidas", "Higiene", "Limpeza", "Eletrônicos", "Roupas", "Outros"]
+
     campos = {
         "Nome": tk.Entry(campos_frame, width=30),
         "Código": tk.Entry(campos_frame, width=30),
         "Preço": tk.Entry(campos_frame, width=30),
         "Quantidade": tk.Entry(campos_frame, width=30),
-        "Data de Validade": tk.Entry(campos_frame, width=30),
+        "Data de Validade": DateEntry(campos_frame, width=27, background='darkblue',
+                                       foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy'),
         "Fornecedor": tk.Entry(campos_frame, width=30),
         "Descrição": tk.Entry(campos_frame, width=30),
-        "Categoria": tk.Entry(campos_frame, width=30)
+        "Categoria": ttk.Combobox(campos_frame, values=categorias, width=28, state="readonly")
     }
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
@@ -36,15 +41,36 @@ def tela_produtos(janela):
             .grid(row=linha, column=coluna, padx=8, pady=6, sticky="e")
         entrada.grid(row=linha, column=coluna + 1, padx=8, pady=6, sticky="w")
 
+    def validar_dados(dados):
+        try:
+            float(dados[2])  # Preço
+        except ValueError:
+            messagebox.showerror("Erro", "Preço deve ser um número válido.")
+            return False
+        if not dados[3].isdigit():
+            messagebox.showerror("Erro", "Quantidade deve ser um número inteiro.")
+            return False
+        if not re.match(r"^\d{2}/\d{2}/\d{4}$", dados[4]):
+            messagebox.showerror("Erro", "Data de Validade deve estar no formato dd/mm/aaaa.")
+            return False
+        return True
+
     def salvar_produto():
         dados = [entrada.get().strip() for entrada in campos.values()]
         if all(dados):
+            if not validar_dados(dados):
+                return
             os.makedirs("dados", exist_ok=True)
             with open("dados/produtos.txt", "a", encoding="utf-8") as arq:
                 arq.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso.")
             for entrada in campos.values():
-                entrada.delete(0, tk.END)
+                if isinstance(entrada, ttk.Combobox):
+                    entrada.set("")
+                elif isinstance(entrada, DateEntry):
+                    entrada.set_date("")
+                else:
+                    entrada.delete(0, tk.END)
             carregar_produtos()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
@@ -70,7 +96,6 @@ def tela_produtos(janela):
     tk.Button(botoes_frame, text="📁 Exportar dados", bg="#0059b3", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=exportar_csv).pack(side="left", padx=10)
 
-    # --- Tabela com Estilo Integrado ---
     tabela_frame = tk.LabelFrame(frame, text="📋 Produtos Cadastrados", bg="#e6f2ff",
                                  font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)

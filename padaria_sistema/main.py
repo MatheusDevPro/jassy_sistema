@@ -38,8 +38,6 @@ from gui.baixa_estoque import tela_baixa_estoque
 
 
 
-
-
 # Placeholder para funções que ainda não foram implementadas
 def placeholder():
     print("Função ainda não implementada")

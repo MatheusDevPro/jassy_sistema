@@ -3,45 +3,44 @@ from tkinter import messagebox
 from tkinter import ttk
 import os
 import csv
+import re
+from tkcalendar import DateEntry
 
 def tela_clientes(janela):
-    # Limpar tela anterior
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
             widget.destroy()
 
-    # Frame principal
     frame = tk.Frame(janela, bg="#e6f2ff")
     frame.pack(fill="both", expand=True)
 
-    # Título
     tk.Label(frame, text="Cadastro de Clientes 👤", font=("Helvetica", 18, "bold"),
              bg="#e6f2ff", fg="#006699").pack(pady=10)
 
-    # Sub-frame dos campos
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
+
+    sexos = ["Masculino", "Feminino", "Outro"]
 
     campos = {
         "Nome": tk.Entry(campos_frame, width=30),
         "CPF": tk.Entry(campos_frame, width=30),
-        "Data de Nascimento": tk.Entry(campos_frame, width=30),
-        "Sexo": tk.Entry(campos_frame, width=30),
+        "Data de Nascimento": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
+        "Sexo": ttk.Combobox(campos_frame, values=sexos, width=28, state="readonly"),
         "RG": tk.Entry(campos_frame, width=30),
-        "Data de Cadastro": tk.Entry(campos_frame, width=30),
+        "Data de Cadastro": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
         "Cidade": tk.Entry(campos_frame, width=30),
         "Estado": tk.Entry(campos_frame, width=30),
         "CEP": tk.Entry(campos_frame, width=30),
         "Bairro": tk.Entry(campos_frame, width=30),
         "Número": tk.Entry(campos_frame, width=30),
         "Complemento": tk.Entry(campos_frame, width=30),
-        "Data de Validade": tk.Entry(campos_frame, width=30),
+        "Data de Validade": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
         "E-mail": tk.Entry(campos_frame, width=30),
         "Telefone": tk.Entry(campos_frame, width=30),
         "Endereço": tk.Entry(campos_frame, width=30)
     }
 
-    # Posicionamento dos campos (2 colunas)
     for i, (rotulo, entrada) in enumerate(campos.items()):
         linha = i // 2
         coluna = (i % 2) * 2
@@ -49,21 +48,52 @@ def tela_clientes(janela):
             .grid(row=linha, column=coluna, padx=8, pady=6, sticky="e")
         entrada.grid(row=linha, column=coluna + 1, padx=8, pady=6, sticky="w")
 
-    # Função para salvar cliente
+    def validar_dados(dados_dict):
+        if not re.fullmatch(r"\d{11}", dados_dict["CPF"]):
+            messagebox.showerror("Erro", "CPF deve conter 11 dígitos numéricos.")
+            return False
+        if not re.fullmatch(r"\d{8}", dados_dict["CEP"]):
+            messagebox.showerror("Erro", "CEP deve conter 8 dígitos.")
+            return False
+        if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", dados_dict["E-mail"]):
+            messagebox.showerror("Erro", "E-mail inválido.")
+            return False
+        if not re.fullmatch(r"\d{10,11}", dados_dict["Telefone"]):
+            messagebox.showerror("Erro", "Telefone deve conter 10 ou 11 dígitos.")
+            return False
+        if not dados_dict["Número"].isdigit():
+            messagebox.showerror("Erro", "Número deve ser numérico.")
+            return False
+        if dados_dict["Sexo"] not in sexos:
+            messagebox.showerror("Erro", "Selecione um sexo válido.")
+            return False
+        if len(dados_dict["RG"]) < 5:
+            messagebox.showerror("Erro", "RG deve conter ao menos 5 caracteres.")
+            return False
+        return True
+
     def salvar_cliente():
-        dados = [entrada.get().strip() for entrada in campos.values()]
-        if all(dados):
+        dados_dict = {rotulo: entrada.get().strip() if not isinstance(entrada, DateEntry)
+                      else entrada.get_date().strftime("%d/%m/%Y")
+                      for rotulo, entrada in campos.items()}
+        if all(dados_dict.values()):
+            if not validar_dados(dados_dict):
+                return
             os.makedirs("dados", exist_ok=True)
             with open("dados/clientes.txt", "a", encoding="utf-8") as arq:
-                arq.write(" | ".join(dados) + "\n")
+                arq.write(" | ".join(dados_dict.values()) + "\n")
             messagebox.showinfo("Sucesso", "Cliente salvo com sucesso.")
             for entrada in campos.values():
-                entrada.delete(0, tk.END)
+                if isinstance(entrada, ttk.Combobox):
+                    entrada.set("")
+                elif isinstance(entrada, DateEntry):
+                    entrada.set_date("")
+                else:
+                    entrada.delete(0, tk.END)
             carregar_clientes()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
 
-    # Função para exportar para CSV
     def exportar_csv():
         try:
             with open("dados/clientes.txt", "r", encoding="utf-8") as f:
@@ -76,7 +106,6 @@ def tela_clientes(janela):
         except FileNotFoundError:
             messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
 
-    # Botões
     botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
@@ -89,7 +118,6 @@ def tela_clientes(janela):
     tk.Button(botoes_frame, text="🔄 Atualizar Lista", bg="#ffcc00", fg="black",
               font=("Helvetica", 12, "bold"), width=20, command=lambda: carregar_clientes()).pack(side="left", padx=10)
 
-    # --- TABELA DE EXIBIÇÃO ---
     tabela_frame = tk.LabelFrame(frame, text="📋 Clientes Cadastrados", bg="#e6f2ff",
                                  font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
@@ -110,7 +138,6 @@ def tela_clientes(janela):
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)
 
-    # Função para carregar os dados
     def carregar_clientes():
         tabela.delete(*tabela.get_children())
         try:

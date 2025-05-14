@@ -6,7 +6,7 @@ from gui.cadastro.produtos import tela_produtos
 from gui.movimentacao.vendas import tela_vendas
 from gui.cadastro.funcionarios import tela_funcionarios
 from gui.cadastro.fornecedores import tela_fornecedores
-from jassy_sistema.padaria_sistema.gui.financeiro.financeiro import tela_financeiro
+from gui.financeiro.financeiro import tela_financeiro
 from gui.cadastro.usuarios import tela_usuarios
 from gui.movimentacao.compras import tela_compras
 from gui.movimentacao.entrada_estoque import tela_entrada_estoque

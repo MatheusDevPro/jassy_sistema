@@ -51,7 +51,7 @@ def tela_transferencia_depositos(janela):
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=8)
     for col in colunas:
         tabela.heading(col, text=col)
-        tabela.column(col, width=120, anchor="center")
+        tabela.column(col, width=300, anchor="center")
 
     scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
     tabela.configure(yscrollcommand=scroll.set)

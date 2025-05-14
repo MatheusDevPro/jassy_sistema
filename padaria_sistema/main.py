@@ -28,6 +28,14 @@ from gui.relatorio_produtos_mais_vendidos import tela_produtos_mais_vendidos
 from gui.relatorio_clientes import tela_relatorio_clientes
 from gui.relatorio_estoque import tela_relatorio_estoque
 from gui.relatorios_personalizados import tela_relatorios_personalizados
+from gui.parametros_sistema import tela_parametros_sistema
+from gui.restauração import tela_backup
+from gui.permissoes_acesso  import tela_permissoes_acesso   
+from gui.personalizacao_interface import tela_personalizacao_interface
+from gui.integracoes import tela_integracoes
+from gui.requisicao_compras import tela_requisicao_compras
+from gui.baixa_estoque import tela_baixa_estoque
+
 
 
 
@@ -37,7 +45,7 @@ def placeholder():
     print("Função ainda não implementada")
 
 janela = tk.Tk()
-janela.title("🍞 Jassy - Gestão")
+janela.title("🐾 Jassy - Gestão")
 janela.geometry("1000x750")
 janela.configure(bg="#f8f8ff")
 
@@ -68,6 +76,9 @@ menu_bar.add_cascade(label="🔁 Movimentações", menu=menu_movimentacoes)
 menu_estoque = tk.Menu(menu_bar, tearoff=0)
 menu_estoque.add_command(label="📋 Consulta de Estoque", command=lambda: tela_consulta_estoque(janela))
 menu_estoque.add_command(label="🛠️ Ajuste de Inventário", command=lambda: tela_ajuste_inventario(janela))
+menu_estoque.add_command(label="🛠️ Baixa de estoque", command=lambda: tela_baixa_estoque(janela))
+menu_estoque.add_command(label="🛠️ Requisição compras", command=lambda: tela_requisicao_compras(janela))
+#menu_estoque.add_command(label="🛠️ Pedidos", command=lambda: tela_pedidos(janela))
 menu_estoque.add_command(label="🔄 Transferência entre Depósitos", command=lambda: tela_transferencia_depositos(janela))
 menu_bar.add_cascade(label="📦 Estoque", menu=menu_estoque)
 
@@ -99,11 +110,11 @@ menu_bar.add_cascade(label="📈 Relatórios", menu=menu_relatorios)
 
 # ⚙️ Administração
 menu_admin = tk.Menu(menu_bar, tearoff=0)
-menu_admin.add_command(label="🛠️Parâmetros do Sistema", command=placeholder)
-menu_admin.add_command(label="💾 Backup / Restauração", command=placeholder)
-menu_admin.add_command(label="🔐 Permissões de Acesso", command=placeholder)
-menu_admin.add_command(label="🎨 Personalização da Interface", command=placeholder)
-menu_admin.add_command(label="🔌 Integrações", command=placeholder)
+menu_admin.add_command(label="🛠️Parâmetros do Sistema", command=lambda: tela_parametros_sistema(janela))
+menu_admin.add_command(label="💾 Backup / Restauração", command=lambda: tela_backup(janela))
+menu_admin.add_command(label="🔐 Permissões de Acesso", command=lambda: tela_permissoes_acesso(janela))
+menu_admin.add_command(label="🎨 Personalização da Interface", command=lambda: tela_personalizacao_interface(janela))
+menu_admin.add_command(label="🔌 Integrações", command=lambda: tela_integracoes(janela))
 menu_bar.add_cascade(label="⚙️ Administração", menu=menu_admin)
 
 # ❓ Ajuda

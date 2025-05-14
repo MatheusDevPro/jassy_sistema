@@ -1,53 +1,97 @@
 import tkinter as tk
+from tkinter import ttk
 
 def mostrar_home(janela):
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
             widget.destroy()
 
-    frame = tk.Frame(janela, bg="#f5f5f5")
+    janela.configure(bg="#f0f4f8")
+    frame = tk.Frame(janela, bg="#f0f4f8")
     frame.pack(fill="both", expand=True)
 
-    titulo = tk.Label(frame, text="🍞 Jessy - Gestão", font=("Helvetica", 24, "bold"), bg="#f5f5f5", fg="#2e4053")
-    titulo.pack(pady=30)
+    # Título
+    titulo = tk.Label(frame, text="🤖 Jessy - Gestão Integrada", font=("Segoe UI", 26, "bold"),
+                      bg="#f0f4f8", fg="#2c3e50")
+    titulo.pack(pady=(30, 10))
 
-    subtitulo = tk.Label(frame, text="Tecnologia para impulsionar seu negócio", font=("Helvetica", 16, "italic"), bg="#f5f5f5", fg="#34495e")
-    subtitulo.pack(pady=10)
+    subtitulo = tk.Label(frame, text="Tecnologia para impulsionar seu negócio", font=("Segoe UI", 15, "italic"),
+                         bg="#f0f4f8", fg="#34495e")
+    subtitulo.pack()
 
-    texto = tk.Label(frame, text="Use o menu acima para navegar entre os módulos de gestão.\nControle de estoque, vendas, finanças e muito mais com facilidade.", font=("Helvetica", 13), bg="#f5f5f5", fg="#555")
-    texto.pack(pady=20)
+    # Cards de atalho
+    card_frame = tk.Frame(frame, bg="#f0f4f8")
+    card_frame.pack(pady=20)
 
-    # Desenho ilustrativo com Canvas (em vez da imagem)
-    canvas = tk.Canvas(frame, width=500, height=300, bg="#ffffff", bd=2, relief="ridge")
-    canvas.pack(pady=30)
+    def criar_card(texto, emoji, cor):
+        card = tk.Frame(card_frame, bg=cor, width=140, height=100, bd=1, relief="ridge")
+        card.pack_propagate(0)
+        label = tk.Label(card, text=f"{emoji}\n{texto}", font=("Segoe UI", 11, "bold"),
+                         fg="white", bg=cor, justify="center")
+        label.pack(expand=True)
+        return card
 
-    # Criando "retângulo" com cantos arredondados usando círculos nos cantos
-    canvas.create_oval(100, 60, 120, 80, fill="#2980b9", outline="#2980b9")  # canto superior esquerdo
-    canvas.create_oval(380, 60, 400, 80, fill="#2980b9", outline="#2980b9")  # canto superior direito
-    canvas.create_oval(100, 200, 120, 220, fill="#2980b9", outline="#2980b9")  # canto inferior esquerdo
-    canvas.create_oval(380, 200, 400, 220, fill="#2980b9", outline="#2980b9")  # canto inferior direito
+    criar_card("Estoque", "📦", "#2980b9").grid(row=0, column=0, padx=10)
+    criar_card("Vendas", "🛒", "#27ae60").grid(row=0, column=1, padx=10)
+    criar_card("Financeiro", "💰", "#d35400").grid(row=0, column=2, padx=10)
+    criar_card("Relatórios", "📈", "#8e44ad").grid(row=0, column=3, padx=10)
 
-    # Criando o corpo do "retângulo"
-    canvas.create_rectangle(120, 60, 380, 220, fill="#ecf0f1", outline="#2980b9", width=2)
+    # Painel visual com gráficos
+    painel = tk.Frame(frame, bg="white", bd=2, relief="groove")
+    painel.pack(padx=40, pady=20, fill="both", expand=False)
 
-    # Título do painel
-    canvas.create_text(250, 80, text="Painel de Gestão", font=("Helvetica", 14, "bold"), fill="#2e4053")
+    titulo_painel = tk.Label(painel, text="📊 Indicadores Rápidos", font=("Segoe UI", 14, "bold"),
+                             bg="white", fg="#2c3e50")
+    titulo_painel.pack(pady=(10, 0))
 
-    # Gráficos (barras)
-    canvas.create_rectangle(130, 180, 150, 210, fill="#76d7c4")
-    canvas.create_rectangle(170, 160, 190, 210, fill="#f7dc6f")
-    canvas.create_rectangle(210, 140, 230, 210, fill="#f1948a")
-    canvas.create_rectangle(250, 170, 270, 210, fill="#a569bd")
-    canvas.create_rectangle(290, 150, 310, 210, fill="#5dade2")
+    canvas = tk.Canvas(painel, width=520, height=230, bg="#ffffff", highlightthickness=0)
+    canvas.pack(pady=15)
 
-    # Engrenagem estilizada
-    canvas.create_oval(360, 140, 390, 170, outline="#5d6d7e", width=2)
-    canvas.create_line(375, 135, 375, 175, fill="#5d6d7e", width=2)
-    canvas.create_line(355, 155, 395, 155, fill="#5d6d7e", width=2)
+    barra_cores = ["#5dade2", "#58d68d", "#f5b041", "#af7ac5", "#ec7063"]
+    alturas = [100, 140, 90, 120, 110]
+    rotulos = ["Vendas", "Estoque", "Compras", "Pedidos", "Clientes"]
 
-    # Ícone de gráfico circular
-    canvas.create_oval(120, 100, 160, 140, fill="#d6eaf8", outline="#2980b9")
-    canvas.create_arc(120, 100, 160, 140, start=0, extent=120, fill="#5dade2")
+    for i, (altura, cor, rotulo) in enumerate(zip(alturas, barra_cores, rotulos)):
+        x0 = 60 + i * 85
+        y0 = 180 - altura
+        x1 = x0 + 40
+        y1 = 180
+        canvas.create_rectangle(x0, y0, x1, y1, fill=cor, width=0)
+        canvas.create_text(x0 + 20, y1 + 15, text=rotulo, font=("Segoe UI", 10), fill="#34495e")
 
-    # Pequeno texto inferior
-    canvas.create_text(250, 240, text="Representação gráfica da gestão integrada", font=("Helvetica", 10), fill="#888")
+    canvas.create_text(260, 215, text="Gráfico ilustrativo de desempenho", font=("Segoe UI", 9), fill="#888")
+
+    # Bloco de Notificações
+    notificacoes = tk.LabelFrame(frame, text="🔔 Notificações do Sistema", font=("Segoe UI", 12, "bold"),
+                                 bg="#fefefe", fg="#2c3e50", padx=10, pady=10)
+    notificacoes.pack(padx=40, pady=10, fill="x")
+
+    tk.Label(notificacoes, text="⚠️  Estoque de Farinha está abaixo do mínimo!", font=("Segoe UI", 10),
+             bg="#fefefe", fg="#c0392b").pack(anchor="w", pady=2)
+
+    tk.Label(notificacoes, text="✅  Backup automático realizado hoje às 02:00.", font=("Segoe UI", 10),
+             bg="#fefefe", fg="#27ae60").pack(anchor="w", pady=2)
+
+    tk.Label(notificacoes, text="📦  Novas requisições aguardando aprovação.", font=("Segoe UI", 10),
+             bg="#fefefe", fg="#2980b9").pack(anchor="w", pady=2)
+
+    # Resumo Rápido
+    resumo_frame = tk.Frame(frame, bg="#f0f4f8")
+    resumo_frame.pack(pady=(10, 30))
+
+    def resumo_dado(titulo, valor, cor):
+        bloco = tk.Frame(resumo_frame, bg=cor, width=150, height=60, bd=1, relief="solid")
+        bloco.pack_propagate(0)
+        tk.Label(bloco, text=titulo, font=("Segoe UI", 10, "bold"), fg="white", bg=cor).pack()
+        tk.Label(bloco, text=valor, font=("Segoe UI", 14), fg="white", bg=cor).pack()
+        return bloco
+
+    resumo_dado("🧾 Produtos", "128", "#3498db").grid(row=0, column=0, padx=10)
+    resumo_dado("📊 Vendas Hoje", "R$ 1.430,00", "#2ecc71").grid(row=0, column=1, padx=10)
+    resumo_dado("🕒 Pendentes", "5 Pedidos", "#f39c12").grid(row=0, column=2, padx=10)
+    resumo_dado("👥 Clientes", "74 ativos", "#9b59b6").grid(row=0, column=3, padx=10)
+
+    # Rodapé
+    rodape = tk.Label(frame, text="🛈 Sistema atualizado com as últimas melhorias - Versão 1.2",
+                      font=("Segoe UI", 9), bg="#f0f4f8", fg="#7f8c8d")
+    rodape.pack(pady=(5, 20))

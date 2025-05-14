@@ -16,23 +16,25 @@ def tela_usuarios(janela):
              bg="#fffaf0", fg="#cc6600").pack(pady=10)
 
     campos_frame = tk.Frame(frame, bg="#fffaf0")
-    campos_frame.pack(pady=10)
+    campos_frame.pack(pady=20)
 
     campos = {
-        "Nome": tk.Entry(campos_frame, width=30),
-        "Login": tk.Entry(campos_frame, width=30),
-        "Senha": tk.Entry(campos_frame, width=30, show="*"),
-        "CPF": tk.Entry(campos_frame, width=30),
-        "Cargo": tk.Entry(campos_frame, width=30),
+        "Nome": tk.Entry(campos_frame, width=40),
+        "Login": tk.Entry(campos_frame, width=40),
+        "Senha": tk.Entry(campos_frame, width=40, show="*"),
+        "CPF": tk.Entry(campos_frame, width=40),
+        "Cargo": tk.Entry(campos_frame, width=40),
         "Permissão": ttk.Combobox(campos_frame, values=["Administrador", "Diretor", "Gerente", "Usuário"], width=28),
         "Status": ttk.Combobox(campos_frame, values=["Ativo", "Inativo", "Bloqueado"], width=28),
-        "Observações": tk.Entry(campos_frame, width=30)
+        "Observações": tk.Entry(campos_frame, width=40)
     }
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
+        linha = i // 2
+        coluna = (i % 2) * 2
         tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0", fg="#663300") \
-            .grid(row=i, column=0, sticky="e", padx=6, pady=4)
-        entrada.grid(row=i, column=1, padx=6, pady=4)
+            .grid(row=linha, column=coluna, padx=6, pady=4, sticky="e")
+        entrada.grid(row=linha, column=coluna + 1, padx=6, pady=4, sticky="w")
 
     def salvar_usuario():
         dados = [entrada.get().strip() for entrada in campos.values()]
@@ -68,7 +70,6 @@ def tela_usuarios(janela):
         if not item:
             messagebox.showwarning("Atenção", "Selecione um usuário para excluir.")
             return
-
         if not messagebox.askyesno("Confirmar", "Deseja realmente excluir este usuário?"):
             return
 
@@ -121,7 +122,6 @@ def tela_usuarios(janela):
     tk.Button(botoes_frame, text="Exportar CSV 📁", bg="#0059b3", fg="white",
               font=("Helvetica", 12, "bold"), command=exportar_csv).pack(side="left", padx=10)
 
-    # TABELA ESTILIZADA DENTRO DA TELA
     tabela_frame = tk.Frame(frame, bg="#fffaf0", bd=2, relief="groove")
     tabela_frame.pack(padx=20, pady=15, fill="both", expand=True)
 
@@ -130,7 +130,7 @@ def tela_usuarios(janela):
     style = ttk.Style()
     style.theme_use("default")
     style.configure("Treeview", background="#fffaf0", foreground="black", rowheight=25, fieldbackground="#fffaf0")
-    style.configure("Treeview.Heading", background="#cc6600", foreground="white", font=("Helvetica", 12, "bold"))
+    style.configure("Treeview.Heading", background="#00a7cc", foreground="white", font=("Helvetica", 12, "bold"))
 
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
     for col in colunas:

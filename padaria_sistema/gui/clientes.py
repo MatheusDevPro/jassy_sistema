@@ -20,7 +20,7 @@ def tela_clientes(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
-    sexos = ["Masculino", "Feminino", "Outro"]
+    sexos = ["Masculino", "Feminino", "Binario", "Não-binário", "Lesbica", "Gay", "Bissexual",  "Outro"]
 
     campos = {
         "Nome": tk.Entry(campos_frame, width=30),

@@ -33,13 +33,16 @@ def tela_devolucoes(janela):
         "Responsável pelo Registro": tk.Entry(campos_frame, width=30)
     }
 
-    # Para distribuir os campos em duas colunas
-    # Para distribuir os campos lado a lado, em uma única linha
+    # Para distribuir os campos em duas colunas (como na entrada de estoque)
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0fff0").grid(row=0, column=i * 2, sticky="e", padx=5, pady=5)
-        entrada.grid(row=0, column=i * 2 + 1, sticky="w", padx=5, pady=5)
+        row = i // 2  # Divide as linhas em dois
+        col = i % 2   # Alterna entre as duas colunas (0 ou 1)
 
-
+        # Criação do rótulo
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0fff0").grid(row=row, column=col * 2, sticky="e", padx=5, pady=5)
+        
+        # Criação do campo de entrada
+        entrada.grid(row=row, column=col * 2 + 1, sticky="w", padx=5, pady=5)
 
     # Salvar devolução
     def salvar_devolucao():

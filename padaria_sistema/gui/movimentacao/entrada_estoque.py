@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+from tkcalendar import DateEntry
 
 def tela_entrada_estoque(janela):
     # Limpar a tela
@@ -26,17 +27,22 @@ def tela_entrada_estoque(janela):
         "Produto": tk.Entry(campos_frame, width=30),
         "Código do Produto": tk.Entry(campos_frame, width=30),
         "Quantidade Entrada": tk.Entry(campos_frame, width=30),
-        "Data de Entrada": tk.Entry(campos_frame, width=30),
+        "Data de Entrada": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
         "Fornecedor": tk.Entry(campos_frame, width=30),
         "Lote": tk.Entry(campos_frame, width=30),
-        "Validade": tk.Entry(campos_frame, width=30),
+        "Validade": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
         "Responsável": tk.Entry(campos_frame, width=30)
     }
 
+   # Distribuir os campos em 2 colunas (4 campos por coluna)
+    campos_por_coluna = 4
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12),
-                 bg="#f0f5f5").grid(row=i, column=0, sticky="e", padx=5, pady=5)
-        entrada.grid(row=i, column=1, sticky="w", padx=5, pady=5)
+        coluna = (i // campos_por_coluna) * 2  # coluna 0 ou 2
+        linha = i % campos_por_coluna
+
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0f5f5")\
+            .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
+        entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
 
     # Salvar Entrada
     def salvar_entrada():

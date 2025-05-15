@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+from tkcalendar import DateEntry
 
 def tela_saida_estoque(janela):
     # Limpar tela
@@ -22,22 +23,30 @@ def tela_saida_estoque(janela):
     campos_frame = tk.Frame(frame, bg="#fff0f0")
     campos_frame.pack(pady=10)
 
+    # Lista de motivos
+    Motivos = ["Venda", "Devolução", "Amostra", "Descarte", "Outros", "Doação", "Troca", "Transferência", "Quebra", "Furto", "Perda"]
+
     campos = {
         "Produto": tk.Entry(campos_frame, width=30),
         "Código do Produto": tk.Entry(campos_frame, width=30),
         "Quantidade Saída": tk.Entry(campos_frame, width=30),
-        "Data de Saída": tk.Entry(campos_frame, width=30),
+        "Data de Saída": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
         "Destino": tk.Entry(campos_frame, width=30),
-        "Motivo": tk.Entry(campos_frame, width=30),
+        "Motivo": ttk.Combobox(campos_frame, width=30, values=Motivos, state="readonly"),
         "Responsável": tk.Entry(campos_frame, width=30)
     }
 
+    # Distribuir os campos em 2 colunas (4 campos por coluna)
+    campos_por_coluna = 4
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12),
-                 bg="#fff0f0").grid(row=i, column=0, sticky="e", padx=5, pady=5)
-        entrada.grid(row=i, column=1, sticky="w", padx=5, pady=5)
+        coluna = (i // campos_por_coluna) * 2  # 0 ou 2
+        linha = i % campos_por_coluna
 
-    # Função salvar
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12),
+                 bg="#fff0f0").grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
+        entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+
+    # Função para salvar a saída
     def salvar_saida():
         dados = [entrada.get() for entrada in campos.values()]
         if all(dados):
@@ -51,7 +60,7 @@ def tela_saida_estoque(janela):
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
 
-    # Exportar CSV
+    # Função para exportar dados para CSV
     def exportar_csv():
         try:
             with open("dados/saida_estoque.txt", "r", encoding="utf-8") as f:
@@ -91,6 +100,7 @@ def tela_saida_estoque(janela):
     tabela.grid(row=0, column=0)
     scroll.grid(row=0, column=1, sticky="ns")
 
+    # Carregar dados
     def carregar_saidas():
         tabela.delete(*tabela.get_children())
         try:

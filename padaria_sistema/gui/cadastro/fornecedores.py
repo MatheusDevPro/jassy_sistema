@@ -17,6 +17,12 @@ def tela_fornecedores(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
+    Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
+    Prazo_de_Entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
+
+    Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
+    Prazo_de_Entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
+
     campos = {
         "Nome da Empresa": tk.Entry(campos_frame, width=30),
         "CNPJ": tk.Entry(campos_frame, width=30),
@@ -24,10 +30,11 @@ def tela_fornecedores(janela):
         "Email": tk.Entry(campos_frame, width=30),
         "Responsável": tk.Entry(campos_frame, width=30),
         "Produto Fornecido": tk.Entry(campos_frame, width=30),
-        "Prazo de Entrega": tk.Entry(campos_frame, width=30),
-        "Forma de Pagamento": tk.Entry(campos_frame, width=30)
-        
+        "Prazo de Entrega": ttk.Combobox(campos_frame, width=30, values=Prazo_de_Entrega, state="readonly"),
+        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=Forma_de_Pagamento, state="readonly")
     }
+
+
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
         linha = i // 2

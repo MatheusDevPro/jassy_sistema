@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+from tkcalendar import DateEntry
 
 def tela_compras(janela):
     # Limpar tela anterior
@@ -22,21 +23,30 @@ def tela_compras(janela):
     campos_frame = tk.Frame(frame, bg="#fffaf0")
     campos_frame.pack(pady=10)
 
+    Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
+
     campos = {
         "Fornecedor": tk.Entry(campos_frame, width=30),
         "Produto": tk.Entry(campos_frame, width=30),
         "Quantidade": tk.Entry(campos_frame, width=30),
         "Valor Unitário": tk.Entry(campos_frame, width=30),
         "Valor Total": tk.Entry(campos_frame, width=30),
-        "Data da Compra": tk.Entry(campos_frame, width=30),
-        "Forma de Pagamento": tk.Entry(campos_frame, width=30),
+        "Data da Compra": DateEntry(campos_frame, width=30, date_pattern='dd/mm/yyyy'),
+        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=Forma_de_Pagamento, state="readonly"),
         "Número da Nota Fiscal": tk.Entry(campos_frame, width=30)
     }
 
+
+    # Distribuir os campos em 2 colunas (4 campos por coluna)
+    campos_por_coluna = 4
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12),
-                 bg="#fffaf0").grid(row=i, column=0, sticky="e", padx=5, pady=5)
-        entrada.grid(row=i, column=1, sticky="w", padx=5, pady=5)
+        coluna = (i // campos_por_coluna) * 2  # coluna 0 e 2
+        linha = i % campos_por_coluna
+
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0")\
+            .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
+        entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+
 
     def salvar_compra():
         dados = [entrada.get() for entrada in campos.values()]

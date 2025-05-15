@@ -50,18 +50,25 @@ def tela_funcionarios(janela):
             return False
 
         return True
+    
+    Cargo = [
+    "Gerente", "Atendente", "Cozinheiro", "Entregador", "Caixa", "Auxiliar de Limpeza",
+    "Estoquista", "Supervisor", "Vendedor", "Auxiliar de Cozinha", "Programador",
+    "Analista de Sistemas", "Designer Gráfico", "Marketing", "Recursos Humanos",
+    "Financeiro", "Contabilidade", "Logística", "Segurança", "Manutenção"
+    ]
 
     campos_info = {
         "Nome": tk.Entry(campos_frame, width=30),
         "CPF": tk.Entry(campos_frame, width=30),
-        "Cargo": tk.Entry(campos_frame, width=30),
+        "Cargo": ttk.Combobox(campos_frame, width=30, values=Cargo, state="readonly"),
         "Salário": tk.Entry(campos_frame, width=30),
         "Data de Admissão": DateEntry(campos_frame, width=27, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
         "Telefone": tk.Entry(campos_frame, width=30),
         "Email": tk.Entry(campos_frame, width=30),
         "Endereço": tk.Entry(campos_frame, width=30)
     }
-
+    
     for i, (rotulo, entrada) in enumerate(campos_info.items()):
         linha = i // 2
         coluna = (i % 2) * 2

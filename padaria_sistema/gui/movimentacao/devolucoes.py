@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+from tkcalendar import DateEntry
 
 def tela_devolucoes(janela):
     # Limpar tela
@@ -26,25 +27,30 @@ def tela_devolucoes(janela):
         "Produto": tk.Entry(campos_frame, width=30),
         "Código do Produto": tk.Entry(campos_frame, width=30),
         "Quantidade Devolvida": tk.Entry(campos_frame, width=30),
-        "Data da Devolução": tk.Entry(campos_frame, width=30),
+        "Data da Devolução": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
         "Motivo da Devolução": tk.Entry(campos_frame, width=30),
         "Cliente ou Destinatário": tk.Entry(campos_frame, width=30),
         "Responsável pelo Registro": tk.Entry(campos_frame, width=30)
     }
 
+    # Para distribuir os campos em duas colunas
+    # Para distribuir os campos lado a lado, em uma única linha
     for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12),
-                 bg="#f0fff0").grid(row=i, column=0, sticky="e", padx=5, pady=5)
-        entrada.grid(row=i, column=1, sticky="w", padx=5, pady=5)
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0fff0").grid(row=0, column=i * 2, sticky="e", padx=5, pady=5)
+        entrada.grid(row=0, column=i * 2 + 1, sticky="w", padx=5, pady=5)
+
+
 
     # Salvar devolução
     def salvar_devolucao():
         dados = [entrada.get() for entrada in campos.values()]
         if all(dados):
+            # Verifica se o diretório existe e cria caso não exista
             os.makedirs("dados", exist_ok=True)
             with open("dados/devolucoes.txt", "a", encoding="utf-8") as f:
                 f.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Devolução registrada com sucesso.")
+            # Limpa os campos após salvar
             for entrada in campos.values():
                 entrada.delete(0, tk.END)
             carregar_devolucoes()
@@ -91,6 +97,7 @@ def tela_devolucoes(janela):
     tabela.grid(row=0, column=0)
     scroll.grid(row=0, column=1, sticky="ns")
 
+    # Carregar dados
     def carregar_devolucoes():
         tabela.delete(*tabela.get_children())
         try:
@@ -102,4 +109,5 @@ def tela_devolucoes(janela):
         except FileNotFoundError:
             pass
 
+    # Inicializar a exibição
     carregar_devolucoes()

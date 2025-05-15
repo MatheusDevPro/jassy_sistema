@@ -24,7 +24,7 @@ def tela_clientes(janela):
 
     campos = {
         "Nome": tk.Entry(campos_frame, width=30),
-        "CPF": tk.Entry(campos_frame, width=30),
+        "**CPF**": tk.Entry(campos_frame, width=30),
         "Data de Nascimento": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
         "Sexo": ttk.Combobox(campos_frame, values=sexos, width=28, state="readonly"),
         "RG": tk.Entry(campos_frame, width=30),

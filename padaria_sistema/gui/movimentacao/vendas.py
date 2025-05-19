@@ -3,6 +3,8 @@ from tkinter import messagebox
 from tkinter import ttk
 import csv
 import os
+from tkcalendar import DateEntry
+from datetime import datetime
 
 def tela_vendas(janela):
     for widget in janela.winfo_children():
@@ -26,8 +28,8 @@ def tela_vendas(janela):
         "Descrição": tk.Entry(campos_frame, width=30),
         "Quantidade": tk.Entry(campos_frame, width=30),
         "Preço Unitário": tk.Entry(campos_frame, width=30),
-        "Data da Venda": tk.Entry(campos_frame, width=30),
-        "Valor Total": tk.Entry(campos_frame, width=30, state="readonly")  # Tornar o campo "Valor Total" somente leitura
+        "Data da Venda": DateEntry(campos_frame, width=30, date_pattern='dd/mm/yyyy'),
+        "Valor Total": tk.Entry(campos_frame, width=30, state="readonly")  # Somente leitura
     }
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
@@ -42,22 +44,20 @@ def tela_vendas(janela):
             quantidade = int(campos["Quantidade"].get())
             preco_unitario = float(campos["Preço Unitário"].get())
             total = quantidade * preco_unitario
-            campos["Valor Total"].config(state="normal")  # Torna o campo editável temporariamente
-            campos["Valor Total"].delete(0, tk.END)  # Limpa o campo de valor total
-            campos["Valor Total"].insert(0, f"{total:.2f}")  # Insere o valor calculado
-            campos["Valor Total"].config(state="readonly")  # Torna o campo somente leitura novamente
+            campos["Valor Total"].config(state="normal")
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].insert(0, f"{total:.2f}")
+            campos["Valor Total"].config(state="readonly")
         except ValueError:
-            campos["Valor Total"].config(state="normal")  # Torna o campo editável temporariamente
-            campos["Valor Total"].delete(0, tk.END)  # Limpa o campo de valor total
-            campos["Valor Total"].insert(0, "0.00")  # Insere valor 0.00 se houver erro nos inputs
-            campos["Valor Total"].config(state="readonly")  # Torna o campo somente leitura novamente
+            campos["Valor Total"].config(state="normal")
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].insert(0, "0.00")
+            campos["Valor Total"].config(state="readonly")
 
-    # Vincula a função de cálculo aos campos de Quantidade e Preço Unitário
     campos["Quantidade"].bind("<KeyRelease>", calcular_total)
     campos["Preço Unitário"].bind("<KeyRelease>", calcular_total)
 
     def salvar_venda():
-        # Verifica se todos os campos estão preenchidos corretamente, incluindo o valor total
         if not campos["Valor Total"].get().strip() or campos["Valor Total"].get().strip() == "0.00":
             messagebox.showwarning("Atenção", "O valor total não pode ser vazio ou 0.00.")
             return
@@ -65,7 +65,6 @@ def tela_vendas(janela):
         dados = [entrada.get().strip() for entrada in campos.values() if entrada.get()]
         total = campos["Valor Total"].get().strip()
 
-        # Verifica se todos os campos foram preenchidos corretamente
         if len(dados) == len(campos) - 1 and total != "0.00":
             os.makedirs("dados", exist_ok=True)
             with open("dados/vendas.txt", "a", encoding="utf-8") as arq:
@@ -107,15 +106,21 @@ def tela_vendas(janela):
     colunas = tuple(campos.keys())
 
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
+
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=130, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    # Scrollbars vertical e horizontal
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+
+    # Layout usando grid para tabela e scrollbars
     tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-    scroll.grid(row=0, column=1, sticky="ns", pady=8)
+    scroll_y.grid(row=0, column=1, sticky="ns", pady=8)
+    scroll_x.grid(row=1, column=0, sticky="ew", padx=8)
 
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)

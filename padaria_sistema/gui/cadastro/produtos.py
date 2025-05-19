@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk
 import csv
 import os
 import re
-from tkcalendar import DateEntry  # calendário
+from tkcalendar import DateEntry
+from datetime import datetime
 
 def tela_produtos(janela):
     for widget in janela.winfo_children():
@@ -56,7 +56,11 @@ def tela_produtos(janela):
         return True
 
     def salvar_produto():
-        dados = [entrada.get().strip() for entrada in campos.values()]
+        dados = [
+            entrada.get().strip() if not isinstance(entrada, DateEntry)
+            else entrada.get_date().strftime("%d/%m/%Y")
+            for entrada in campos.values()
+        ]
         if all(dados):
             if not validar_dados(dados):
                 return
@@ -68,7 +72,7 @@ def tela_produtos(janela):
                 if isinstance(entrada, ttk.Combobox):
                     entrada.set("")
                 elif isinstance(entrada, DateEntry):
-                    entrada.set_date("")
+                    entrada.set_date(datetime.today())
                 else:
                     entrada.delete(0, tk.END)
             carregar_produtos()
@@ -102,16 +106,20 @@ def tela_produtos(janela):
 
     colunas = tuple(campos.keys())
 
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
+    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
+
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=130, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
-    tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-    scroll.grid(row=0, column=1, sticky="ns", pady=8)
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+
+    tabela.grid(row=0, column=0, sticky="nsew")
+    scroll_y.grid(row=0, column=1, sticky="ns")
+    scroll_x.grid(row=1, column=0, sticky="ew")
 
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)

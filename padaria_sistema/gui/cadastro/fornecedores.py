@@ -17,11 +17,8 @@ def tela_fornecedores(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
-    Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
-    Prazo_de_Entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
-
-    Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
-    Prazo_de_Entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
+    formas_pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
+    prazos_entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
 
     campos = {
         "Nome da Empresa": tk.Entry(campos_frame, width=30),
@@ -30,11 +27,9 @@ def tela_fornecedores(janela):
         "Email": tk.Entry(campos_frame, width=30),
         "Responsável": tk.Entry(campos_frame, width=30),
         "Produto Fornecido": tk.Entry(campos_frame, width=30),
-        "Prazo de Entrega": ttk.Combobox(campos_frame, width=30, values=Prazo_de_Entrega, state="readonly"),
-        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=Forma_de_Pagamento, state="readonly")
+        "Prazo de Entrega": ttk.Combobox(campos_frame, width=30, values=prazos_entrega, state="readonly"),
+        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=formas_pagamento, state="readonly")
     }
-
-
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
         linha = i // 2
@@ -51,7 +46,10 @@ def tela_fornecedores(janela):
                 arq.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Fornecedor salvo com sucesso.")
             for entrada in campos.values():
-                entrada.delete(0, tk.END)
+                if isinstance(entrada, ttk.Combobox):
+                    entrada.set("")
+                else:
+                    entrada.delete(0, tk.END)
             carregar_fornecedores()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
@@ -82,17 +80,20 @@ def tela_fornecedores(janela):
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
 
     colunas = tuple(campos.keys())
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
+    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
 
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=150, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
-    tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-    scroll.grid(row=0, column=1, sticky="ns", pady=8)
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+
+    tabela.grid(row=0, column=0, sticky="nsew")
+    scroll_y.grid(row=0, column=1, sticky="ns")
+    scroll_x.grid(row=1, column=0, sticky="ew")
 
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)

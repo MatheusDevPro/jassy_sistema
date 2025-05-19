@@ -4,6 +4,7 @@ from tkcalendar import DateEntry
 import csv
 import os
 import re
+from datetime import datetime
 
 def tela_funcionarios(janela):
     for widget in janela.winfo_children():
@@ -27,22 +28,18 @@ def tela_funcionarios(janela):
         email = entradas["Email"].get()
         salario = entradas["Salário"].get()
 
-        # Validação CPF
         if not re.fullmatch(r"\d{3}\.\d{3}\.\d{3}-\d{2}", cpf):
             messagebox.showerror("Erro", "CPF inválido. Formato correto: 000.000.000-00")
             return False
 
-        # Validação Telefone
         if not re.fullmatch(r"\(\d{2}\) \d{5}-\d{4}", telefone):
             messagebox.showerror("Erro", "Telefone inválido. Formato correto: (00) 00000-0000")
             return False
 
-        # Validação Email
         if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             messagebox.showerror("Erro", "Email inválido.")
             return False
 
-        # Validação Salário
         try:
             float(salario)
         except ValueError:
@@ -50,12 +47,12 @@ def tela_funcionarios(janela):
             return False
 
         return True
-    
+
     Cargo = [
-    "Gerente", "Atendente", "Cozinheiro", "Entregador", "Caixa", "Auxiliar de Limpeza",
-    "Estoquista", "Supervisor", "Vendedor", "Auxiliar de Cozinha", "Programador",
-    "Analista de Sistemas", "Designer Gráfico", "Marketing", "Recursos Humanos",
-    "Financeiro", "Contabilidade", "Logística", "Segurança", "Manutenção"
+        "Gerente", "Atendente", "Cozinheiro", "Entregador", "Caixa", "Auxiliar de Limpeza",
+        "Estoquista", "Supervisor", "Vendedor", "Auxiliar de Cozinha", "Programador",
+        "Analista de Sistemas", "Designer Gráfico", "Marketing", "Recursos Humanos",
+        "Financeiro", "Contabilidade", "Logística", "Segurança", "Manutenção"
     ]
 
     campos_info = {
@@ -68,7 +65,7 @@ def tela_funcionarios(janela):
         "Email": tk.Entry(campos_frame, width=30),
         "Endereço": tk.Entry(campos_frame, width=30)
     }
-    
+
     for i, (rotulo, entrada) in enumerate(campos_info.items()):
         linha = i // 2
         coluna = (i % 2) * 2
@@ -87,8 +84,10 @@ def tela_funcionarios(janela):
                 arq.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Funcionário salvo com sucesso.")
             for entrada in entradas.values():
-                entrada.delete(0, tk.END)
-            entradas["Data de Admissão"].set_date("")
+                if isinstance(entrada, DateEntry):
+                    entrada.set_date(datetime.today())
+                else:
+                    entrada.delete(0, tk.END)
             carregar_funcionarios()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
@@ -119,17 +118,20 @@ def tela_funcionarios(janela):
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
 
     colunas = tuple(entradas.keys())
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
+    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
 
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=130, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    # Scrollbars
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 
-    tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-    scroll.grid(row=0, column=1, sticky="ns", pady=8)
+    tabela.grid(row=0, column=0, sticky="nsew")
+    scroll_y.grid(row=0, column=1, sticky="ns")
+    scroll_x.grid(row=1, column=0, sticky="ew")
 
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)

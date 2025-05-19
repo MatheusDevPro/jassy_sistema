@@ -36,7 +36,6 @@ def tela_compras(janela):
         "Número da Nota Fiscal": tk.Entry(campos_frame, width=30)
     }
 
-
     # Distribuir os campos em 2 colunas (4 campos por coluna)
     campos_por_coluna = 4
     for i, (rotulo, entrada) in enumerate(campos.items()):
@@ -46,7 +45,6 @@ def tela_compras(janela):
         tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0")\
             .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
         entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
-
 
     def salvar_compra():
         dados = [entrada.get() for entrada in campos.values()]
@@ -83,9 +81,9 @@ def tela_compras(janela):
     tk.Button(botoes_frame, text="Exportar CSV 📁", bg="#333366", fg="white",
               font=("Helvetica", 12, "bold"), command=exportar_compras_csv).pack(side="left", padx=10)
 
-    # Tabela com Scroll
+    # Tabela com Scroll vertical e horizontal
     tabela_frame = tk.Frame(frame)
-    tabela_frame.pack(pady=10)
+    tabela_frame.pack(pady=10, fill="both", expand=True)
 
     colunas = tuple(campos.keys())
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=10)
@@ -94,11 +92,19 @@ def tela_compras(janela):
         tabela.heading(col, text=col)
         tabela.column(col, width=120, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    # Scrollbars vertical e horizontal
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
-    tabela.grid(row=0, column=0)
-    scroll.grid(row=0, column=1, sticky="ns")
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+
+    # Layout com grid para os widgets e scrollbars
+    tabela.grid(row=0, column=0, sticky="nsew")
+    scroll_y.grid(row=0, column=1, sticky="ns")
+    scroll_x.grid(row=1, column=0, sticky="ew")
+
+    tabela_frame.grid_rowconfigure(0, weight=1)
+    tabela_frame.grid_columnconfigure(0, weight=1)
 
     def carregar_compras():
         tabela.delete(*tabela.get_children())

@@ -21,40 +21,68 @@ def tela_compras(janela):
 
     # Frame dos campos
     campos_frame = tk.Frame(frame, bg="#fffaf0")
-    campos_frame.pack(pady=10)
+    campos_frame.pack(pady=10, padx=10)
 
     Forma_de_Pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
+    categorias = ["Alimentos", "Bebidas", "Limpeza", "Eletrônicos", "Roupas", "Outros"]
+    unidades = ["Un", "Kg", "g", "L", "ml", "Pacote", "Caixa"]
+    status_compra = ["Pendente", "Pago", "Cancelado"]
 
     campos = {
         "Fornecedor": tk.Entry(campos_frame, width=30),
         "Produto": tk.Entry(campos_frame, width=30),
+        "Categoria": ttk.Combobox(campos_frame, width=27, values=categorias, state="readonly"),
+        "Unidade de Medida": ttk.Combobox(campos_frame, width=27, values=unidades, state="readonly"),
         "Quantidade": tk.Entry(campos_frame, width=30),
         "Valor Unitário": tk.Entry(campos_frame, width=30),
         "Valor Total": tk.Entry(campos_frame, width=30),
         "Data da Compra": DateEntry(campos_frame, width=30, date_pattern='dd/mm/yyyy'),
-        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=Forma_de_Pagamento, state="readonly"),
-        "Número da Nota Fiscal": tk.Entry(campos_frame, width=30)
+        "Data de Recebimento": DateEntry(campos_frame, width=30, date_pattern='dd/mm/yyyy'),
+        "Forma de Pagamento": ttk.Combobox(campos_frame, width=27, values=Forma_de_Pagamento, state="readonly"),
+        "Status da Compra": ttk.Combobox(campos_frame, width=27, values=status_compra, state="readonly"),
+        "Número da Nota Fiscal": tk.Entry(campos_frame, width=30),
+        "Observações": tk.Text(campos_frame, width=62, height=4)
     }
 
-    # Distribuir os campos em 2 colunas (4 campos por coluna)
-    campos_por_coluna = 4
-    for i, (rotulo, entrada) in enumerate(campos.items()):
-        coluna = (i // campos_por_coluna) * 2  # coluna 0 e 2
-        linha = i % campos_por_coluna
+    # Valores padrão para comboboxes
+    campos["Categoria"].current(0)
+    campos["Unidade de Medida"].current(0)
+    campos["Forma de Pagamento"].current(0)
+    campos["Status da Compra"].current(0)
 
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0")\
-            .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
-        entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+    # Distribuir os campos em 2 colunas (com exceção de Observações que ocupa toda largura)
+    campos_por_coluna = 7
+    i = 0
+    for rotulo, entrada in campos.items():
+        if rotulo == "Observações":
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0")\
+                .grid(row=campos_por_coluna, column=0, sticky="nw", padx=5, pady=5)
+            entrada.grid(row=campos_por_coluna, column=1, columnspan=3, sticky="w", padx=5, pady=5)
+        else:
+            coluna = (i // campos_por_coluna) * 2
+            linha = i % campos_por_coluna
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0")\
+                .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
+            entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+            i += 1
 
     def salvar_compra():
-        dados = [entrada.get() for entrada in campos.values()]
+        dados = []
+        for rotulo, entrada in campos.items():
+            if rotulo == "Observações":
+                dados.append(entrada.get("1.0", "end").strip())
+            else:
+                dados.append(entrada.get().strip())
         if all(dados):
             os.makedirs("dados", exist_ok=True)
             with open("dados/compras.txt", "a", encoding="utf-8") as f:
                 f.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Compra registrada com sucesso.")
-            for entrada in campos.values():
-                entrada.delete(0, tk.END)
+            for rotulo, entrada in campos.items():
+                if rotulo == "Observações":
+                    entrada.delete("1.0", "end")
+                else:
+                    entrada.delete(0, tk.END)
             carregar_compras()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
@@ -92,13 +120,11 @@ def tela_compras(janela):
         tabela.heading(col, text=col)
         tabela.column(col, width=120, anchor="center")
 
-    # Scrollbars vertical e horizontal
     scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
     scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
     tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 
-    # Layout com grid para os widgets e scrollbars
     tabela.grid(row=0, column=0, sticky="nsew")
     scroll_y.grid(row=0, column=1, sticky="ns")
     scroll_x.grid(row=1, column=0, sticky="ew")

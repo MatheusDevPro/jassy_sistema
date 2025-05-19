@@ -21,39 +21,72 @@ def tela_entrada_estoque(janela):
 
     # Frame dos campos
     campos_frame = tk.Frame(frame, bg="#f0f5f5")
-    campos_frame.pack(pady=10)
+    campos_frame.pack(pady=10, padx=10)
+
+    # Valores para combos
+    categorias = ["Alimentos", "Bebidas", "Limpeza", "Eletrônicos", "Roupas", "Outros"]
+    unidades = ["Un", "Kg", "g", "L", "ml", "Pacote", "Caixa"]
+    status_produto = ["Ativo", "Inativo"]
 
     campos = {
         "Produto": tk.Entry(campos_frame, width=30),
         "Código do Produto": tk.Entry(campos_frame, width=30),
+        "Categoria": ttk.Combobox(campos_frame, width=27, values=categorias, state="readonly"),
+        "Unidade de Medida": ttk.Combobox(campos_frame, width=27, values=unidades, state="readonly"),
         "Quantidade Entrada": tk.Entry(campos_frame, width=30),
+        "Valor Unitário (R$)": tk.Entry(campos_frame, width=30),
         "Data de Entrada": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
+        "Número da Nota Fiscal": tk.Entry(campos_frame, width=30),
         "Fornecedor": tk.Entry(campos_frame, width=30),
         "Lote": tk.Entry(campos_frame, width=30),
         "Validade": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
-        "Responsável": tk.Entry(campos_frame, width=30)
+        "Status do Produto": ttk.Combobox(campos_frame, width=27, values=status_produto, state="readonly"),
+        "Responsável": tk.Entry(campos_frame, width=30),
+        "Data Última Atualização": DateEntry(campos_frame, width=30, background='darkblue', foreground='white', date_pattern='dd/mm/yyyy'),
+        "Observações": tk.Text(campos_frame, width=62, height=4)
     }
 
-   # Distribuir os campos em 2 colunas (4 campos por coluna)
-    campos_por_coluna = 4
-    for i, (rotulo, entrada) in enumerate(campos.items()):
-        coluna = (i // campos_por_coluna) * 2  # coluna 0 ou 2
-        linha = i % campos_por_coluna
+    # Set default values for comboboxes
+    campos["Categoria"].current(0)
+    campos["Unidade de Medida"].current(0)
+    campos["Status do Produto"].current(0)
 
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0f5f5")\
-            .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
-        entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+    # Distribuir os campos em 2 colunas (com exceção de Observações que ocupa toda a largura)
+    campos_por_coluna = 7
+    i = 0
+    for rotulo, entrada in campos.items():
+        if rotulo == "Observações":
+            # Observações ocupa toda a largura abaixo dos outros campos
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0f5f5")\
+                .grid(row=campos_por_coluna, column=0, sticky="nw", padx=5, pady=5)
+            entrada.grid(row=campos_por_coluna, column=1, columnspan=3, sticky="w", padx=5, pady=5)
+        else:
+            coluna = (i // campos_por_coluna) * 2  # coluna 0 ou 2
+            linha = i % campos_por_coluna
+
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#f0f5f5")\
+                .grid(row=linha, column=coluna, sticky="e", padx=5, pady=5)
+            entrada.grid(row=linha, column=coluna + 1, sticky="w", padx=5, pady=5)
+            i += 1
 
     # Salvar Entrada
     def salvar_entrada():
-        dados = [entrada.get() for entrada in campos.values()]
+        dados = []
+        for rotulo, entrada in campos.items():
+            if rotulo == "Observações":
+                dados.append(entrada.get("1.0", "end").strip())
+            else:
+                dados.append(entrada.get().strip())
         if all(dados):
             os.makedirs("dados", exist_ok=True)
             with open("dados/entrada_estoque.txt", "a", encoding="utf-8") as f:
                 f.write(" | ".join(dados) + "\n")
             messagebox.showinfo("Sucesso", "Entrada registrada com sucesso.")
-            for entrada in campos.values():
-                entrada.delete(0, tk.END)
+            for rotulo, entrada in campos.items():
+                if rotulo == "Observações":
+                    entrada.delete("1.0", "end")
+                else:
+                    entrada.delete(0, tk.END)
             carregar_entradas()
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
@@ -81,9 +114,9 @@ def tela_entrada_estoque(janela):
     tk.Button(botoes_frame, text="Exportar CSV 📁", bg="#00334d", fg="white",
               font=("Helvetica", 12, "bold"), command=exportar_csv).pack(side="left", padx=10)
 
-    # Tabela com Scroll
+    # Tabela com Scroll vertical e horizontal
     tabela_frame = tk.Frame(frame)
-    tabela_frame.pack(pady=10)
+    tabela_frame.pack(pady=10, fill="both", expand=True)
 
     colunas = tuple(campos.keys())
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=10)
@@ -92,11 +125,17 @@ def tela_entrada_estoque(janela):
         tabela.heading(col, text=col)
         tabela.column(col, width=120, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
 
-    tabela.grid(row=0, column=0)
-    scroll.grid(row=0, column=1, sticky="ns")
+    tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+
+    tabela.grid(row=0, column=0, sticky="nsew")
+    scroll_y.grid(row=0, column=1, sticky="ns")
+    scroll_x.grid(row=1, column=0, sticky="ew")
+
+    tabela_frame.grid_rowconfigure(0, weight=1)
+    tabela_frame.grid_columnconfigure(0, weight=1)
 
     # Carregar dados
     def carregar_entradas():

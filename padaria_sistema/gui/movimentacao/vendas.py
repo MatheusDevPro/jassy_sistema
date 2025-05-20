@@ -1,8 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
-import csv
-import os
+from tkinter import messagebox, ttk
+import os, csv
 from tkcalendar import DateEntry
 from datetime import datetime
 
@@ -12,7 +10,6 @@ def tela_vendas(janela):
             widget.destroy()
 
     janela.configure(bg="#e6f2ff")
-
     frame = tk.Frame(janela, bg="#e6f2ff")
     frame.pack(fill="both", expand=True)
 
@@ -22,110 +19,112 @@ def tela_vendas(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10, padx=10)
 
-    # Valores possíveis para Comboboxes
     categorias = ["Eletrônicos", "Alimentos", "Vestuário", "Cosméticos", "Livros", "Outros"]
     status_venda = ["Pendente", "Pago", "Cancelado"]
-    condicoes_pagamento = ["À vista", "Parcelado 2x", "Parcelado 3x", "Parcelado 4x ou mais"]
+    condicoes_pagamento = ["À vista", "2x", "3x", "4x ou mais"]
+    formas_pagamento = ["Dinheiro", "Cartão", "Pix", "Boleto"]
+    entrega_opcoes = ["Retirada no Local", "Entrega"]
 
-    # Criando os campos
+    numero_pedido = datetime.now().strftime("%Y%m%d%H%M%S")
+
     campos = {
-        "Código": tk.Entry(campos_frame, width=25),
+        "Nº Pedido": tk.Entry(campos_frame, width=25),
+        "Data da Venda": DateEntry(campos_frame, width=22, date_pattern='dd/mm/yyyy'),
+        "Cliente": tk.Entry(campos_frame, width=25),
+        "CPF/CNPJ": tk.Entry(campos_frame, width=25),
         "Produto": tk.Entry(campos_frame, width=25),
         "Descrição": tk.Entry(campos_frame, width=25),
         "Categoria": ttk.Combobox(campos_frame, values=categorias, state="readonly", width=23),
         "Quantidade": tk.Entry(campos_frame, width=25),
         "Preço Unitário": tk.Entry(campos_frame, width=25),
-        "Data da Venda": DateEntry(campos_frame, width=22, date_pattern='dd/mm/yyyy'),
-        "Cliente": tk.Entry(campos_frame, width=25),
+        "Desconto (R$)": tk.Entry(campos_frame, width=25),
+        "Acréscimo (R$)": tk.Entry(campos_frame, width=25),
+        "Valor Total Líquido": tk.Entry(campos_frame, width=25, state="readonly"),
         "Vendedor": tk.Entry(campos_frame, width=25),
-        "Status": ttk.Combobox(campos_frame, values=status_venda, state="readonly", width=23),
+        "Forma de Pagamento": ttk.Combobox(campos_frame, values=formas_pagamento, state="readonly", width=23),
         "Condição de Pagamento": ttk.Combobox(campos_frame, values=condicoes_pagamento, state="readonly", width=23),
-        "Valor Total": tk.Entry(campos_frame, width=25, state="readonly"),
+        "Entrega": ttk.Combobox(campos_frame, values=entrega_opcoes, state="readonly", width=23),
+        "Status": ttk.Combobox(campos_frame, values=status_venda, state="readonly", width=23),
     }
 
-    # Posicionamento em grid (duas colunas)
-    linhas = 0
-    colunas = 0
-    for i, (rotulo, entrada) in enumerate(campos.items()):
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
-            .grid(row=linhas, column=colunas*2, padx=8, pady=6, sticky="e")
-        entrada.grid(row=linhas, column=colunas*2 + 1, padx=8, pady=6, sticky="w")
-        colunas += 1
-        if colunas > 1:
-            colunas = 0
-            linhas += 1
+    campos["Nº Pedido"].insert(0, numero_pedido)
+    campos["Nº Pedido"].config(state="readonly")
 
-    # Campo de Observações (Text widget maior, ocupa 2 colunas)
-    tk.Label(campos_frame, text="Observações:", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
-        .grid(row=linhas, column=0, padx=8, pady=6, sticky="ne")
-    texto_obs = tk.Text(campos_frame, width=55, height=4)
-    texto_obs.grid(row=linhas, column=1, columnspan=3, padx=8, pady=6, sticky="w")
-    linhas += 1
+    # Posicionamento
+    linha, coluna = 0, 0
+    for rotulo, entrada in campos.items():
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66")\
+            .grid(row=linha, column=coluna*2, padx=8, pady=6, sticky="e")
+        entrada.grid(row=linha, column=coluna*2+1, padx=8, pady=6, sticky="w")
+        coluna += 1
+        if coluna > 1:
+            coluna = 0
+            linha += 1
 
-    # Função para calcular valor total automaticamente
+    tk.Label(campos_frame, text="Observações:", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66")\
+        .grid(row=linha, column=0, padx=8, pady=6, sticky="ne")
+    obs = tk.Text(campos_frame, width=55, height=3)
+    obs.grid(row=linha, column=1, columnspan=3, padx=8, pady=6, sticky="w")
+    linha += 1
+
     def calcular_total(event=None):
         try:
-            quantidade = int(campos["Quantidade"].get())
-            preco_unitario = float(campos["Preço Unitário"].get())
-            total = quantidade * preco_unitario
-            campos["Valor Total"].config(state="normal")
-            campos["Valor Total"].delete(0, tk.END)
-            campos["Valor Total"].insert(0, f"{total:.2f}")
-            campos["Valor Total"].config(state="readonly")
-        except ValueError:
-            campos["Valor Total"].config(state="normal")
-            campos["Valor Total"].delete(0, tk.END)
-            campos["Valor Total"].insert(0, "0.00")
-            campos["Valor Total"].config(state="readonly")
+            qnt = int(campos["Quantidade"].get())
+            preco = float(campos["Preço Unitário"].get())
+            desc = float(campos["Desconto (R$)"].get() or 0)
+            acres = float(campos["Acréscimo (R$)"].get() or 0)
+            total = qnt * preco - desc + acres
+            campos["Valor Total Líquido"].config(state="normal")
+            campos["Valor Total Líquido"].delete(0, tk.END)
+            campos["Valor Total Líquido"].insert(0, f"{total:.2f}")
+            campos["Valor Total Líquido"].config(state="readonly")
+        except:
+            campos["Valor Total Líquido"].config(state="normal")
+            campos["Valor Total Líquido"].delete(0, tk.END)
+            campos["Valor Total Líquido"].insert(0, "0.00")
+            campos["Valor Total Líquido"].config(state="readonly")
 
-    campos["Quantidade"].bind("<KeyRelease>", calcular_total)
-    campos["Preço Unitário"].bind("<KeyRelease>", calcular_total)
+    for campo in ["Quantidade", "Preço Unitário", "Desconto (R$)", "Acréscimo (R$)"]:
+        campos[campo].bind("<KeyRelease>", calcular_total)
 
-    def salvar_venda():
-        valores = []
-        for key, entrada in campos.items():
-            if isinstance(entrada, DateEntry):
-                valores.append(entrada.get_date().strftime('%d/%m/%Y'))
+    def salvar():
+        dados = []
+        for key, campo in campos.items():
+            if isinstance(campo, DateEntry):
+                dados.append(campo.get_date().strftime("%d/%m/%Y"))
             else:
-                valores.append(entrada.get().strip())
+                dados.append(campo.get().strip())
 
-        obs_text = texto_obs.get("1.0", tk.END).strip()
-        if not obs_text:
-            obs_text = "-"
-        valores.append(obs_text)  # Adiciona observações no final
+        observacao = obs.get("1.0", tk.END).strip() or "-"
+        dados.append(observacao)
 
-        # Verificar campos obrigatórios (excluindo Valor Total e Observações)
-        obrigatorios = list(campos.keys())
-        obrigatorios.remove("Valor Total")
-        for i, campo in enumerate(campos):
-            if campo in obrigatorios and valores[i] == "":
-                messagebox.showwarning("Atenção", f"Preencha o campo '{campo}'.")
+        obrigatorios = [k for k in campos if "Valor Total" not in k and "Desconto" not in k and "Acréscimo" not in k]
+        for i, k in enumerate(campos):
+            if k in obrigatorios and not dados[i]:
+                messagebox.showwarning("Aviso", f"Preencha o campo: {k}")
                 return
 
-        if valores[obrigatorios.index("Quantidade")] == "0" or valores[-2] == "0.00":
-            messagebox.showwarning("Atenção", "Quantidade e Valor Total devem ser maiores que zero.")
+        if dados[list(campos).index("Quantidade")] == "0" or dados[list(campos).index("Valor Total Líquido")] == "0.00":
+            messagebox.showwarning("Erro", "Quantidade e Valor Total devem ser maiores que zero.")
             return
 
         os.makedirs("dados", exist_ok=True)
-
-        # Salvar com separador | e incluir observações no final
         with open("dados/vendas.txt", "a", encoding="utf-8") as arq:
-            arq.write(" | ".join(valores) + "\n")
+            arq.write(" | ".join(dados) + "\n")
+        messagebox.showinfo("Salvo", "Venda registrada com sucesso.")
 
-        messagebox.showinfo("Sucesso", "Venda registrada com sucesso.")
-
-        # Limpar campos
-        for entrada in campos.values():
-            if isinstance(entrada, tk.Entry):
-                entrada.config(state="normal")
-                entrada.delete(0, tk.END)
-                if entrada == campos["Valor Total"]:
-                    entrada.config(state="readonly")
-            elif isinstance(entrada, ttk.Combobox):
-                entrada.set("")
-            elif isinstance(entrada, DateEntry):
-                entrada.set_date(datetime.today())
-        texto_obs.delete("1.0", tk.END)
+        for campo in campos.values():
+            if isinstance(campo, tk.Entry):
+                campo.config(state="normal")
+                campo.delete(0, tk.END)
+            elif isinstance(campo, ttk.Combobox):
+                campo.set("")
+            elif isinstance(campo, DateEntry):
+                campo.set_date(datetime.today())
+        obs.delete("1.0", tk.END)
+        campos["Nº Pedido"].insert(0, datetime.now().strftime("%Y%m%d%H%M%S"))
+        campos["Nº Pedido"].config(state="readonly")
+        campos["Valor Total Líquido"].config(state="readonly")
 
         carregar_vendas()
 
@@ -137,34 +136,30 @@ def tela_vendas(janela):
                 writer = csv.writer(f_csv)
                 writer.writerow(list(campos.keys()) + ["Observações"])
                 writer.writerows(linhas)
-            messagebox.showinfo("Exportado", "Dados exportados para 'dados/vendas.csv'.")
+            messagebox.showinfo("Exportado", "Exportado para dados/vendas.csv")
         except FileNotFoundError:
-            messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
+            messagebox.showwarning("Erro", "Nenhum dado para exportar.")
 
-    botoes_frame = tk.Frame(frame, bg="#e6f2ff")
-    botoes_frame.pack(pady=10)
+    botoes = tk.Frame(frame, bg="#e6f2ff")
+    botoes.pack(pady=10)
 
-    tk.Button(botoes_frame, text="💾 Registrar Venda", bg="#339966", fg="white",
-              font=("Helvetica", 12, "bold"), width=20, command=salvar_venda).pack(side="left", padx=10)
-
-    tk.Button(botoes_frame, text="📁 Exportar dados", bg="#0059b3", fg="white",
-              font=("Helvetica", 12, "bold"), width=20, command=exportar_csv).pack(side="left", padx=10)
+    tk.Button(botoes, text="💾 Registrar Venda", command=salvar, bg="#339966", fg="white",
+              font=("Helvetica", 12, "bold"), width=20).pack(side="left", padx=10)
+    tk.Button(botoes, text="📁 Exportar CSV", command=exportar_csv, bg="#0059b3", fg="white",
+              font=("Helvetica", 12, "bold"), width=20).pack(side="left", padx=10)
 
     tabela_frame = tk.LabelFrame(frame, text="📋 Vendas Registradas", bg="#e6f2ff",
                                  font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
 
     colunas = list(campos.keys()) + ["Observações"]
-
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
-
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=120, anchor="center")
 
     scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
     scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
-
     tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 
     tabela.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)

@@ -122,52 +122,50 @@ def main_app():
 def tela_login():
     login_win = tk.Tk()
     login_win.title("🔐 Login - Jassy Gestão")
-    login_win.geometry("400x550")
+    login_win.geometry("420x560")
     login_win.configure(bg="#1e1e2f")
     login_win.resizable(False, False)
 
-    # Fundo com gradiente
-    login_win.canvas = tk.Canvas(login_win, width=400, height=550, bg="#1e1e2f", bd=0, highlightthickness=0)
-    login_win.canvas.pack()
+    canvas = tk.Canvas(login_win, width=420, height=560, bg="#1e1e2f", bd=0, highlightthickness=0)
+    canvas.pack()
 
-    # Gradiente de fundo
-    login_win.canvas.create_rectangle(0, 0, 400, 550, fill="#5c6bc0", outline="")
+    # Fundo com gradiente simulando
+    canvas.create_rectangle(0, 0, 420, 560, fill="#5c6bc0", outline="")
 
-    # Card de login centralizado
-    card = tk.Frame(login_win, bg="white", bd=0, relief="solid", padx=20, pady=20)
+    # Card de login com sombra
+    card = tk.Frame(login_win, bg="white", padx=20, pady=20, highlightbackground="#aaa", highlightthickness=1)
     card.place(relx=0.5, rely=0.5, anchor="center")
 
-    # Título do login
-    tk.Label(card, text="🚀 Bem-vindo ao Jassy", font=("Arial", 18, "bold"), fg="#3f51b5").pack(pady=10)
+    # Logo / título
+    tk.Label(card, text="🔐 Jassy Gestão", font=("Arial", 20, "bold"), fg="#3f51b5", bg="white").pack(pady=(5, 15))
 
-    # Campos de Login
-    tk.Label(card, text="Usuário", font=("Arial", 12), fg="#444").pack(pady=5)
+    # Entrada de usuário
+    tk.Label(card, text="👤 Usuário", font=("Arial", 11), fg="#444", bg="white").pack(anchor="w")
     entry_usuario = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", fg="#555", bg="#f0f0f5", insertbackground='black')
-    entry_usuario.pack(pady=10, ipady=6)
+    entry_usuario.pack(fill="x", pady=(0, 10), ipady=6)
+
     entry_usuario.bind("<FocusIn>", lambda event: entry_usuario.config(bg="#e8eaf6"))
     entry_usuario.bind("<FocusOut>", lambda event: entry_usuario.config(bg="#f0f0f5"))
 
-    tk.Label(card, text="Senha", font=("Arial", 12), fg="#444").pack(pady=5)
+    # Entrada de senha
+    tk.Label(card, text="🔒 Senha", font=("Arial", 11), fg="#444", bg="white").pack(anchor="w")
     entry_senha = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", show="*", fg="#555", bg="#f0f0f5", insertbackground='black')
-    entry_senha.pack(pady=10, ipady=6)
+    entry_senha.pack(fill="x", pady=(0, 10), ipady=6)
+
     entry_senha.bind("<FocusIn>", lambda event: entry_senha.config(bg="#e8eaf6"))
     entry_senha.bind("<FocusOut>", lambda event: entry_senha.config(bg="#f0f0f5"))
 
-    # Função para mostrar/ocultar senha
+    # Mostrar/ocultar senha
     def toggle_senha():
-        if entry_senha.cget('show') == "*":
-            entry_senha.config(show="")
-        else:
-            entry_senha.config(show="*")
+        entry_senha.config(show="" if entry_senha.cget('show') == "*" else "*")
 
-    # Botão de "mostrar senha"
-    tk.Checkbutton(card, text="Mostrar senha", command=toggle_senha, font=("Arial", 10), fg="#3f51b5", selectcolor="#5c6bc0").pack(pady=5)
+    tk.Checkbutton(card, text="Mostrar senha", command=toggle_senha, font=("Arial", 10), fg="#3f51b5", selectcolor="#f0f0f5", bg="white").pack(pady=5, anchor="w")
 
     # Mensagem de erro
-    lbl_erro = tk.Label(card, text="", fg="red", font=("Arial", 10))
-    lbl_erro.pack(pady=5)
+    lbl_erro = tk.Label(card, text="", fg="red", font=("Arial", 10), bg="white")
+    lbl_erro.pack(pady=(5, 0))
 
-    # Função para validar login
+    # Validação de login
     def validar_login():
         usuario = entry_usuario.get().strip()
         senha = entry_senha.get().strip()
@@ -178,24 +176,36 @@ def tela_login():
 
         if usuario == "matheus" and senha == "123456":
             login_win.destroy()
-            main_app()  # Inicia o sistema principal
+            main_app()  # Substitua por sua função principal
         else:
             lbl_erro.config(text="❌ Usuário ou senha inválidos")
 
-    # Botão de Login com efeito de hover
+    # Botão de login
     def on_enter(event):
         login_button.config(bg="#3f51b5", fg="white")
 
     def on_leave(event):
         login_button.config(bg="white", fg="#3f51b5")
 
-    login_button = tk.Button(card, text="Login", font=("Arial", 14), width=20, bg="white", fg="#3f51b5", command=validar_login, relief="solid", bd=2)
+    login_button = tk.Button(
+        card,
+        text="Entrar no sistema",
+        font=("Arial", 13, "bold"),
+        width=25,
+        bg="white",
+        fg="#3f51b5",
+        command=validar_login,
+        relief="solid",
+        bd=2,
+        cursor="hand2"
+    )
     login_button.pack(pady=20)
     login_button.bind("<Enter>", on_enter)
     login_button.bind("<Leave>", on_leave)
 
     login_win.mainloop()
 
+# Exemplo de função principal
 
-# Inicia a tela de login
+# Rodar
 tela_login()

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
-# Importações do seu sistema
+# Importações do seu sistema (exemplo: algumas já definidas)
 from gui.home import mostrar_home
 from gui.cadastro.clientes import tela_clientes
 from gui.cadastro.produtos import tela_produtos
@@ -38,9 +38,26 @@ from gui.adm.integracoes import tela_integracoes
 from gui.estoque.requisicao_compras import tela_requisicao_compras
 from gui.estoque.baixa_estoque import tela_baixa_estoque
 
+# Novas telas exemplo (você precisa criar esses módulos)
+# from gui.rh.gestao_pessoal import tela_gestao_pessoal
+# from gui.rh.folha_pagamento import tela_folha_pagamento
+# from gui.crm.gestao_oportunidades import tela_gestao_oportunidades
+# from gui.producao.chamados import tela_chamados_producao
+# from gui.marketing.campanhas import tela_campanhas_marketing
+# from gui.suporte.helpdesk import tela_helpdesk
 
 def placeholder():
-    print("Função ainda não implementada")
+    messagebox.showinfo("Em Desenvolvimento", "Esta funcionalidade ainda não foi implementada.")
+
+def limpar_janela(janela):
+    for widget in janela.winfo_children():
+        if widget.winfo_class() != 'Menu':
+          widget.destroy()
+
+def mostrar_tela(janela, func_tela, titulo="Sistema de Gestão"):
+    limpar_janela(janela)
+    janela.title(titulo)
+    func_tela(janela)
 
 def main_app():
     janela = tk.Tk()
@@ -50,162 +67,164 @@ def main_app():
 
     menu_bar = tk.Menu(janela)
 
-    menu_bar.add_command(label="🏠 Início", command=lambda: mostrar_home(janela))
+    # Menu Início
+    menu_bar.add_command(label="🏠 Início", command=lambda: mostrar_tela(janela, mostrar_home, "Início - Jassy Gestão"))
 
+    # Menu Cadastros
     menu_cadastros = tk.Menu(menu_bar, tearoff=0)
-    menu_cadastros.add_command(label="👤 Clientes", command=lambda: tela_clientes(janela))
-    menu_cadastros.add_command(label="📦 Produtos", command=lambda: tela_produtos(janela))
-    menu_cadastros.add_command(label="👨‍🍳 Funcionários", command=lambda: tela_funcionarios(janela))
-    menu_cadastros.add_command(label="📨 Fornecedores", command=lambda: tela_fornecedores(janela))
-    menu_cadastros.add_command(label="🔐 Usuários / Permissões", command=lambda: tela_usuarios(janela))
+    menu_cadastros.add_command(label="👤 Clientes", command=lambda: mostrar_tela(janela, tela_clientes, "Clientes"))
+    menu_cadastros.add_command(label="📦 Produtos", command=lambda: mostrar_tela(janela, tela_produtos, "Produtos"))
+    menu_cadastros.add_command(label="👨‍🍳 Funcionários", command=lambda: mostrar_tela(janela, tela_funcionarios, "Funcionários"))
+    menu_cadastros.add_command(label="📨 Fornecedores", command=lambda: mostrar_tela(janela, tela_fornecedores, "Fornecedores"))
+    menu_cadastros.add_command(label="🔐 Usuários / Permissões", command=lambda: mostrar_tela(janela, tela_usuarios, "Usuários e Permissões"))
     menu_bar.add_cascade(label="📋 Cadastros", menu=menu_cadastros)
 
+    # Menu Movimentações
     menu_movimentacoes = tk.Menu(menu_bar, tearoff=0)
-    menu_movimentacoes.add_command(label="💰 Vendas", command=lambda: tela_vendas(janela))
-    menu_movimentacoes.add_command(label="🛒 Compras", command=lambda: tela_compras(janela))
-    menu_movimentacoes.add_command(label="📦 Entrada de Estoque", command=lambda: tela_entrada_estoque(janela))
-    menu_movimentacoes.add_command(label="🚚 Saída de Estoque", command=lambda: tela_saida_estoque(janela))
-    menu_movimentacoes.add_command(label="↩️ Devoluções", command=lambda: tela_devolucoes(janela))
+    menu_movimentacoes.add_command(label="💰 Vendas", command=lambda: mostrar_tela(janela, tela_vendas, "Vendas"))
+    menu_movimentacoes.add_command(label="🛒 Compras", command=lambda: mostrar_tela(janela, tela_compras, "Compras"))
+    menu_movimentacoes.add_command(label="📦 Entrada de Estoque", command=lambda: mostrar_tela(janela, tela_entrada_estoque, "Entrada de Estoque"))
+    menu_movimentacoes.add_command(label="🚚 Saída de Estoque", command=lambda: mostrar_tela(janela, tela_saida_estoque, "Saída de Estoque"))
+    menu_movimentacoes.add_command(label="↩️ Devoluções", command=lambda: mostrar_tela(janela, tela_devolucoes, "Devoluções"))
     menu_bar.add_cascade(label="🔁 Movimentações", menu=menu_movimentacoes)
 
+    # Menu Estoque
     menu_estoque = tk.Menu(menu_bar, tearoff=0)
-    menu_estoque.add_command(label="📋 Consulta de Estoque", command=lambda: tela_consulta_estoque(janela))
-    menu_estoque.add_command(label="🛠️ Ajuste de Inventário", command=lambda: tela_ajuste_inventario(janela))
-    menu_estoque.add_command(label="🛠️ Baixa de estoque", command=lambda: tela_baixa_estoque(janela))
-    menu_estoque.add_command(label="🛠️ Requisição compras", command=lambda: tela_requisicao_compras(janela))
-    menu_estoque.add_command(label="🔄 Transferência entre Depósitos", command=lambda: tela_transferencia_depositos(janela))
+    menu_estoque.add_command(label="📋 Consulta de Estoque", command=lambda: mostrar_tela(janela, tela_consulta_estoque, "Consulta de Estoque"))
+    menu_estoque.add_command(label="🛠️ Ajuste de Inventário", command=lambda: mostrar_tela(janela, tela_ajuste_inventario, "Ajuste de Inventário"))
+    menu_estoque.add_command(label="🛠️ Baixa de Estoque", command=lambda: mostrar_tela(janela, tela_baixa_estoque, "Baixa de Estoque"))
+    menu_estoque.add_command(label="🛠️ Requisição de Compras", command=lambda: mostrar_tela(janela, tela_requisicao_compras, "Requisição de Compras"))
+    menu_estoque.add_command(label="🔄 Transferência entre Depósitos", command=lambda: mostrar_tela(janela, tela_transferencia_depositos, "Transferência entre Depósitos"))
     menu_bar.add_cascade(label="📦 Estoque", menu=menu_estoque)
 
+    # Menu Financeiro
     menu_financeiro = tk.Menu(menu_bar, tearoff=0)
-    menu_financeiro.add_command(label="📊 Fluxo de Caixa", command=lambda: tela_financeiro(janela))
-    menu_financeiro.add_command(label="💸 Contas a Pagar", command=lambda: tela_contas_a_pagar(janela))
-    menu_financeiro.add_command(label="💸 Contas a Receber", command=lambda: tela_contas_a_receber(janela))
-    menu_financeiro.add_command(label="🏦 Conciliação Bancária", command=lambda: tela_conciliacao_bancaria(janela))
-    menu_financeiro.add_command(label="📉 Demonstrativo de Lucros", command=lambda: tela_demonstrativo_lucros(janela))
+    menu_financeiro.add_command(label="📊 Fluxo de Caixa", command=lambda: mostrar_tela(janela, tela_financeiro, "Fluxo de Caixa"))
+    menu_financeiro.add_command(label="💸 Contas a Pagar", command=lambda: mostrar_tela(janela, tela_contas_a_pagar, "Contas a Pagar"))
+    menu_financeiro.add_command(label="💸 Contas a Receber", command=lambda: mostrar_tela(janela, tela_contas_a_receber, "Contas a Receber"))
+    menu_financeiro.add_command(label="🏦 Conciliação Bancária", command=lambda: mostrar_tela(janela, tela_conciliacao_bancaria, "Conciliação Bancária"))
+    menu_financeiro.add_command(label="📉 Demonstrativo de Lucros", command=lambda: mostrar_tela(janela, tela_demonstrativo_lucros, "Demonstrativo de Lucros"))
     menu_bar.add_cascade(label="💰 Financeiro", menu=menu_financeiro)
 
+    # Menu Faturamento
     menu_faturamento = tk.Menu(menu_bar, tearoff=0)
-    menu_faturamento.add_command(label="📄 Emissão de Boletos", command=lambda: tela_emissao_boletos(janela))
-    menu_faturamento.add_command(label="📄 Emissão de Notas fiscais", command=lambda: tela_emissao_nf(janela))
-    menu_faturamento.add_command(label="📄 Boletos emitidos", command=lambda: tela_boletos_emitidos(janela))
-    menu_faturamento.add_command(label="📄 Notas Fiscais emitidas", command=lambda: tela_notas_emitidas(janela))
+    menu_faturamento.add_command(label="📄 Emissão de Boletos", command=lambda: mostrar_tela(janela, tela_emissao_boletos, "Emissão de Boletos"))
+    menu_faturamento.add_command(label="📄 Emissão de Notas Fiscais", command=lambda: mostrar_tela(janela, tela_emissao_nf, "Emissão de Notas Fiscais"))
+    menu_faturamento.add_command(label="📄 Boletos Emitidos", command=lambda: mostrar_tela(janela, tela_boletos_emitidos, "Boletos Emitidos"))
+    menu_faturamento.add_command(label="📄 Notas Fiscais Emitidas", command=lambda: mostrar_tela(janela, tela_notas_emitidas, "Notas Fiscais Emitidas"))
     menu_bar.add_cascade(label="💰 Faturamento", menu=menu_faturamento)
 
+    # Menu Relatórios
     menu_relatorios = tk.Menu(menu_bar, tearoff=0)
-    menu_relatorios.add_command(label="📈 Relatório de Vendas", command=lambda: tela_relatorio_vendas(janela))
-    menu_relatorios.add_command(label="🔥 Produtos Mais Vendidos", command=lambda: tela_produtos_mais_vendidos(janela))
-    menu_relatorios.add_command(label="📊 Relatório de Clientes", command=lambda: tela_relatorio_clientes(janela))
-    menu_relatorios.add_command(label="📦 Relatório de Estoque", command=lambda: tela_relatorio_estoque(janela))
-    menu_relatorios.add_command(label="🧾 Relatórios Personalizados", command=lambda: tela_relatorios_personalizados(janela))
+    menu_relatorios.add_command(label="📈 Relatório de Vendas", command=lambda: mostrar_tela(janela, tela_relatorio_vendas, "Relatório de Vendas"))
+    menu_relatorios.add_command(label="🔥 Produtos Mais Vendidos", command=lambda: mostrar_tela(janela, tela_produtos_mais_vendidos, "Produtos Mais Vendidos"))
+    menu_relatorios.add_command(label="📊 Relatório de Clientes", command=lambda: mostrar_tela(janela, tela_relatorio_clientes, "Relatório de Clientes"))
+    menu_relatorios.add_command(label="📦 Relatório de Estoque", command=lambda: mostrar_tela(janela, tela_relatorio_estoque, "Relatório de Estoque"))
+    menu_relatorios.add_command(label="🧾 Relatórios Personalizados", command=lambda: mostrar_tela(janela, tela_relatorios_personalizados, "Relatórios Personalizados"))
     menu_bar.add_cascade(label="📈 Relatórios", menu=menu_relatorios)
 
-    menu_admin = tk.Menu(menu_bar, tearoff=0)
-    menu_admin.add_command(label="🛠️Parâmetros do Sistema", command=lambda: tela_parametros_sistema(janela))
-    menu_admin.add_command(label="💾 Backup / Restauração", command=lambda: tela_backup(janela))
-    menu_admin.add_command(label="🔐 Permissões de Acesso", command=lambda: tela_permissoes_acesso(janela))
-    menu_admin.add_command(label="🎨 Personalização da Interface", command=lambda: tela_personalizacao_interface(janela))
-    menu_admin.add_command(label="🔌 Integrações", command=lambda: tela_integracoes(janela))
-    menu_bar.add_cascade(label="⚙️ Administração", menu=menu_admin)
+    # Novo Menu RH (Recursos Humanos)
+    menu_rh = tk.Menu(menu_bar, tearoff=0)
+    menu_rh.add_command(label="👥 Gestão de Pessoal", command=placeholder)  # tela_gestao_pessoal
+    menu_rh.add_command(label="🧾 Folha de Pagamento", command=placeholder)  # tela_folha_pagamento
+    menu_rh.add_command(label="📅 Controle de Ponto", command=placeholder)
+    menu_rh.add_command(label="📊 Relatórios RH", command=placeholder)
+    menu_bar.add_cascade(label="👔 RH", menu=menu_rh)
 
-    menu_ajuda = tk.Menu(menu_bar, tearoff=0)
-    menu_ajuda.add_command(label="📘 Manual do Usuário", command=placeholder)
-    menu_ajuda.add_command(label="📞 Suporte", command=placeholder)
-    menu_ajuda.add_command(label="ℹ️ Sobre o Sistema", command=placeholder)
-    menu_bar.add_cascade(label="❓ Ajuda", menu=menu_ajuda)
+    # Novo Menu CRM / Projetos
+    menu_crm = tk.Menu(menu_bar, tearoff=0)
+    menu_crm.add_command(label="📇 Gestão de Oportunidades", command=placeholder)  # tela_gestao_oportunidades
+    menu_crm.add_command(label="📞 Contatos e Histórico", command=placeholder)
+    menu_crm.add_command(label="📅 Agenda e Compromissos", command=placeholder)
+    menu_crm.add_command(label="📊 Relatórios CRM", command=placeholder)
+    menu_bar.add_cascade(label="📊 CRM / Projetos", menu=menu_crm)
 
-    menu_bar.add_command(label="🚪 Sair", command=janela.quit)
+    # Novo Menu Produção (caso tenha)
+    menu_producao = tk.Menu(menu_bar, tearoff=0)
+    menu_producao.add_command(label="🛠️ Chamados Produção", command=placeholder)  # tela_chamados_producao
+    menu_producao.add_command(label="⚙️ Ordens de Produção", command=placeholder)
+    menu_producao.add_command(label="📋 Controle de Qualidade", command=placeholder)
+    menu_bar.add_cascade(label="🏭 Produção", menu=menu_producao)
+
+    # Novo Menu Marketing
+    menu_marketing = tk.Menu(menu_bar, tearoff=0)
+    menu_marketing.add_command(label="📢 Campanhas", command=placeholder)  # tela_campanhas_marketing
+    menu_marketing.add_command(label="📊 Análise de Mercado", command=placeholder)
+    menu_marketing.add_command(label="📈 Relatórios Marketing", command=placeholder)
+    menu_bar.add_cascade(label="📣 Marketing", menu=menu_marketing)
+
+    # Novo Menu Suporte / Helpdesk
+    menu_suporte = tk.Menu(menu_bar, tearoff=0)
+    menu_suporte.add_command(label="🎫 Helpdesk", command=placeholder)  # tela_helpdesk
+    menu_suporte.add_command(label="📞 Contatos Suporte", command=placeholder)
+    menu_bar.add_cascade(label="🛠️ Suporte", menu=menu_suporte)
+
+    # Menu Administração / Configurações
+    menu_administracao = tk.Menu(menu_bar, tearoff=0)
+    menu_administracao.add_command(label="⚙️ Parâmetros do Sistema", command=lambda: mostrar_tela(janela, tela_parametros_sistema, "Parâmetros do Sistema"))
+    menu_administracao.add_command(label="🔒 Permissões de Acesso", command=lambda: mostrar_tela(janela, tela_permissoes_acesso, "Permissões de Acesso"))
+    menu_administracao.add_command(label="🎨 Personalização da Interface", command=lambda: mostrar_tela(janela, tela_personalizacao_interface, "Personalização da Interface"))
+    menu_administracao.add_command(label="🔄 Backup e Restauração", command=lambda: mostrar_tela(janela, tela_backup, "Backup e Restauração"))
+    menu_administracao.add_command(label="🔗 Integrações", command=lambda: mostrar_tela(janela, tela_integracoes, "Integrações"))
+    menu_bar.add_cascade(label="⚙️ Administração", menu=menu_administracao)
+
+    # Sair
+    menu_bar.add_command(label="🚪 Sair", command=janela.destroy)
+
     janela.config(menu=menu_bar)
-    mostrar_home(janela)
+
+    # Começa na tela inicial
+    mostrar_tela(janela, mostrar_home, "Início - Jassy Gestão")
+
     janela.mainloop()
 
 
+# Tela de login (mantive seu código original, com leve melhoria)
 def tela_login():
     login_win = tk.Tk()
-    login_win.title("🔐 Login - Jassy Gestão")
-    login_win.geometry("420x560")
-    login_win.configure(bg="#1e1e2f")
-    login_win.resizable(False, False)
+    login_win.title("🐾 Login - Jassy Gestão")
+    login_win.geometry("300x230")
+    login_win.configure(bg="#f8f8ff")
 
-    canvas = tk.Canvas(login_win, width=420, height=560, bg="#1e1e2f", bd=0, highlightthickness=0)
-    canvas.pack()
+    # Centralizar janela
+    screen_width = login_win.winfo_screenwidth()
+    screen_height = login_win.winfo_screenheight()
+    x = (screen_width // 2) - (300 // 2)
+    y = (screen_height // 2) - (230 // 2)
+    login_win.geometry(f"+{x}+{y}")
 
-    # Fundo com gradiente simulando
-    canvas.create_rectangle(0, 0, 420, 560, fill="#5c6bc0", outline="")
+    label_titulo = tk.Label(login_win, text="🐾 Login Jassy", font=("Arial", 14, "bold"), fg="#1E90FF", bg="#f8f8ff")
+    label_titulo.pack(pady=10)
 
-    # Card de login com sombra
-    card = tk.Frame(login_win, bg="white", padx=20, pady=20, highlightbackground="#aaa", highlightthickness=1)
-    card.place(relx=0.5, rely=0.5, anchor="center")
+    label_usuario = tk.Label(login_win, text="Usuário:", font=("Arial", 10), bg="#f8f8ff")
+    label_usuario.pack()
+    entry_usuario = tk.Entry(login_win, font=("Arial", 10))
+    entry_usuario.pack()
 
-    # Logo / título
-    tk.Label(card, text="🔐 Jassy Gestão", font=("Arial", 20, "bold"), fg="#3f51b5", bg="white").pack(pady=(5, 15))
+    label_senha = tk.Label(login_win, text="Senha:", font=("Arial", 10), bg="#f8f8ff")
+    label_senha.pack()
+    entry_senha = tk.Entry(login_win, font=("Arial", 10), show="*")
+    entry_senha.pack()
 
-    # Entrada de usuário
-    tk.Label(card, text="👤 Usuário", font=("Arial", 11), fg="#444", bg="white").pack(anchor="w")
-    entry_usuario = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", fg="#555", bg="#f0f0f5", insertbackground='black')
-    entry_usuario.pack(fill="x", pady=(0, 10), ipady=6)
+    label_erro = tk.Label(login_win, text="", fg="red", bg="#f8f8ff")
+    label_erro.pack(pady=5)
 
-    entry_usuario.bind("<FocusIn>", lambda event: entry_usuario.config(bg="#e8eaf6"))
-    entry_usuario.bind("<FocusOut>", lambda event: entry_usuario.config(bg="#f0f0f5"))
-
-    # Entrada de senha
-    tk.Label(card, text="🔒 Senha", font=("Arial", 11), fg="#444", bg="white").pack(anchor="w")
-    entry_senha = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", show="*", fg="#555", bg="#f0f0f5", insertbackground='black')
-    entry_senha.pack(fill="x", pady=(0, 10), ipady=6)
-
-    entry_senha.bind("<FocusIn>", lambda event: entry_senha.config(bg="#e8eaf6"))
-    entry_senha.bind("<FocusOut>", lambda event: entry_senha.config(bg="#f0f0f5"))
-
-    # Mostrar/ocultar senha
-    def toggle_senha():
-        entry_senha.config(show="" if entry_senha.cget('show') == "*" else "*")
-
-    tk.Checkbutton(card, text="Mostrar senha", command=toggle_senha, font=("Arial", 10), fg="#3f51b5", selectcolor="#f0f0f5", bg="white").pack(pady=5, anchor="w")
-
-    # Mensagem de erro
-    lbl_erro = tk.Label(card, text="", fg="red", font=("Arial", 10), bg="white")
-    lbl_erro.pack(pady=(5, 0))
-
-    # Validação de login
     def validar_login():
-        usuario = entry_usuario.get().strip()
-        senha = entry_senha.get().strip()
-
-        if usuario == "" or senha == "":
-            lbl_erro.config(text="❌ Usuário e senha não podem estar vazios")
-            return
-
+        usuario = entry_usuario.get()
+        senha = entry_senha.get()
+        # Simples validação fixa
         if usuario == "matheus" and senha == "123456":
             login_win.destroy()
-            main_app()  # Substitua por sua função principal
+            main_app()
         else:
-            lbl_erro.config(text="❌ Usuário ou senha inválidos")
+            label_erro.config(text="Usuário ou senha inválidos")
+            # messagebox.showerror("Erro", "Usuário ou senha inválidos")
 
-    # Botão de login
-    def on_enter(event):
-        login_button.config(bg="#3f51b5", fg="white")
-
-    def on_leave(event):
-        login_button.config(bg="white", fg="#3f51b5")
-
-    login_button = tk.Button(
-        card,
-        text="Entrar no sistema",
-        font=("Arial", 13, "bold"),
-        width=25,
-        bg="white",
-        fg="#3f51b5",
-        command=validar_login,
-        relief="solid",
-        bd=2,
-        cursor="hand2"
-    )
-    login_button.pack(pady=20)
-    login_button.bind("<Enter>", on_enter)
-    login_button.bind("<Leave>", on_leave)
+    botao_login = tk.Button(login_win, text="Login", font=("Arial", 10, "bold"), bg="#1E90FF", fg="white", command=validar_login)
+    botao_login.pack(pady=10)
 
     login_win.mainloop()
 
-# Exemplo de função principal
-
-# Rodar
-tela_login()
+# Iniciar o programa
+if __name__ == "__main__":
+    tela_login()

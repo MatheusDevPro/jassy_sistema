@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import os
 import csv
+import re
 
 def tela_fornecedores(janela):
     for widget in janela.winfo_children():
@@ -19,6 +20,8 @@ def tela_fornecedores(janela):
 
     formas_pagamento = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Boleto", "Cheque", "Pix"]
     prazos_entrega = ["1 dia", "2 dias", "3 dias", "4 dias", "5 dias", "6 dias", "7 dias"]
+    estados = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
+               "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 
     campos = {
         "Nome da Empresa": tk.Entry(campos_frame, width=30),
@@ -28,7 +31,12 @@ def tela_fornecedores(janela):
         "Responsável": tk.Entry(campos_frame, width=30),
         "Produto Fornecido": tk.Entry(campos_frame, width=30),
         "Prazo de Entrega": ttk.Combobox(campos_frame, width=30, values=prazos_entrega, state="readonly"),
-        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=formas_pagamento, state="readonly")
+        "Forma de Pagamento": ttk.Combobox(campos_frame, width=30, values=formas_pagamento, state="readonly"),
+        "Endereço": tk.Entry(campos_frame, width=30),
+        "Cidade": tk.Entry(campos_frame, width=30),
+        "Estado (UF)": ttk.Combobox(campos_frame, width=30, values=estados, state="readonly"),
+        "CEP": tk.Entry(campos_frame, width=30),
+        "Número de Registro": tk.Entry(campos_frame, width=30),
     }
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
@@ -41,6 +49,12 @@ def tela_fornecedores(janela):
     def salvar_fornecedor():
         dados = [entrada.get().strip() for entrada in campos.values()]
         if all(dados):
+            # Validação de CNPJ
+            cnpj = dados[1]
+            if not re.fullmatch(r"\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}", cnpj):
+                messagebox.showerror("Erro", "CNPJ inválido. Ex: 00.000.000/0000-00")
+                return
+            
             os.makedirs("dados", exist_ok=True)
             with open("dados/fornecedores.txt", "a", encoding="utf-8") as arq:
                 arq.write(" | ".join(dados) + "\n")
@@ -66,11 +80,40 @@ def tela_fornecedores(janela):
         except FileNotFoundError:
             messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
 
+    def carregar_fornecedores():
+        tabela.delete(*tabela.get_children())
+        try:
+            with open("dados/fornecedores.txt", "r", encoding="utf-8") as f:
+                for linha in f:
+                    valores = [valor.strip() for valor in linha.strip().split("|")]
+                    if len(valores) == len(colunas):
+                        tabela.insert("", "end", values=valores)
+        except FileNotFoundError:
+            pass
+
+    def carregar_para_edicao(event):
+        item = tabela.selection()
+        if item:
+            valores = tabela.item(item[0])["values"]
+            for i, entrada in enumerate(campos.values()):
+                if isinstance(entrada, ttk.Combobox):
+                    entrada.set(valores[i])
+                else:
+                    entrada.delete(0, tk.END)
+                    entrada.insert(0, valores[i])
+
+            salvar_btn.pack_forget()
+            atualizar_btn.pack(side="left", padx=10)
+
     botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
-    tk.Button(botoes_frame, text="💾 Salvar Fornecedor", bg="#339966", fg="white",
-              font=("Helvetica", 12, "bold"), width=20, command=salvar_fornecedor).pack(side="left", padx=10)
+    salvar_btn = tk.Button(botoes_frame, text="💾 Salvar Fornecedor", bg="#339966", fg="white",
+                           font=("Helvetica", 12, "bold"), width=20, command=salvar_fornecedor)
+    salvar_btn.pack(side="left", padx=10)
+
+    atualizar_btn = tk.Button(botoes_frame, text="🔄 Atualizar Fornecedor", bg="#ff9933", fg="white",
+                              font=("Helvetica", 12, "bold"), width=20)
 
     tk.Button(botoes_frame, text="📁 Exportar dados", bg="#0059b3", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=exportar_csv).pack(side="left", padx=10)
@@ -98,15 +141,6 @@ def tela_fornecedores(janela):
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)
 
-    def carregar_fornecedores():
-        tabela.delete(*tabela.get_children())
-        try:
-            with open("dados/fornecedores.txt", "r", encoding="utf-8") as f:
-                for linha in f:
-                    valores = [valor.strip() for valor in linha.strip().split("|")]
-                    if len(valores) == len(colunas):
-                        tabela.insert("", "end", values=valores)
-        except FileNotFoundError:
-            pass
+    tabela.bind("<Double-1>", carregar_para_edicao)
 
     carregar_fornecedores()

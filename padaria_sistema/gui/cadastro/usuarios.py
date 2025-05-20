@@ -9,15 +9,16 @@ def tela_usuarios(janela):
         if widget.winfo_class() != 'Menu':
             widget.destroy()
 
-    frame = tk.Frame(janela, bg="#fffaf0")
+    frame = tk.Frame(janela, bg="#e6f2ff")
     frame.pack(fill="both", expand=True)
 
     tk.Label(frame, text="Gestão de Usuários 🔐", font=("Helvetica", 18, "bold"),
-             bg="#fffaf0", fg="#cc6600").pack(pady=10)
+             bg="#e6f2ff", fg="#006699").pack(pady=10)
 
-    campos_frame = tk.Frame(frame, bg="#fffaf0")
+    campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=20)
 
+    # Campos de entrada do formulário
     campos = {
         "Nome": tk.Entry(campos_frame, width=40),
         "Login": tk.Entry(campos_frame, width=40),
@@ -29,13 +30,49 @@ def tela_usuarios(janela):
         "Observações": tk.Entry(campos_frame, width=40)
     }
 
+    # Layout dos campos
     for i, (rotulo, entrada) in enumerate(campos.items()):
         linha = i // 2
         coluna = (i % 2) * 2
-        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0", fg="#663300") \
+        tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
             .grid(row=linha, column=coluna, padx=6, pady=4, sticky="e")
         entrada.grid(row=linha, column=coluna + 1, padx=6, pady=4, sticky="w")
 
+    # Campos de busca
+    busca_frame = tk.Frame(frame, bg="#e6f2ff")
+    busca_frame.pack(pady=10)
+
+    tk.Label(busca_frame, text="Buscar por Nome:", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
+        .grid(row=0, column=0, padx=6, pady=4, sticky="e")
+    busca_nome = tk.Entry(busca_frame, width=40)
+    busca_nome.grid(row=0, column=1, padx=6, pady=4, sticky="w")
+
+    tk.Label(busca_frame, text="Buscar por CPF:", font=("Helvetica", 12), bg="#e6f2ff", fg="#003d66") \
+        .grid(row=0, column=2, padx=6, pady=4, sticky="e")
+    busca_cpf = tk.Entry(busca_frame, width=40)
+    busca_cpf.grid(row=0, column=3, padx=6, pady=4, sticky="w")
+
+    def buscar_usuario():
+        nome_busca = busca_nome.get().strip()
+        cpf_busca = busca_cpf.get().strip()
+
+        # Limpar a tabela antes de atualizar com novos dados
+        tabela.delete(*tabela.get_children())
+
+        try:
+            with open("dados/usuarios.txt", "r", encoding="utf-8") as f:
+                for linha in f:
+                    valores = [v.strip() for v in linha.strip().split("|")]
+                    if len(valores) == len(colunas):
+                        # Filtro por nome e/ou CPF
+                        if (nome_busca.lower() in valores[0].lower() or nome_busca == "") and (cpf_busca in valores[3] or cpf_busca == ""):
+                            tabela.insert("", "end", values=valores)
+        except FileNotFoundError:
+            pass
+
+    tk.Button(busca_frame, text="Buscar 🔍", bg="#0059b3", fg="white", font=("Helvetica", 12, "bold"), command=buscar_usuario).grid(row=0, column=4, padx=10)
+
+    # Função de salvar usuário
     def salvar_usuario():
         dados = [entrada.get().strip() for entrada in campos.values()]
         data_cadastro = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -53,6 +90,7 @@ def tela_usuarios(janela):
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
 
+    # Função de exportar dados para CSV
     def exportar_csv():
         try:
             with open("dados/usuarios.txt", "r", encoding="utf-8") as f:
@@ -65,6 +103,7 @@ def tela_usuarios(janela):
         except FileNotFoundError:
             messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
 
+    # Função de excluir usuário
     def excluir_usuario():
         item = tabela.selection()
         if not item:
@@ -85,6 +124,7 @@ def tela_usuarios(janela):
 
         messagebox.showinfo("Sucesso", "Usuário excluído com sucesso.")
 
+    # Função de editar usuário
     def editar_usuario():
         item = tabela.selection()
         if not item:
@@ -107,7 +147,8 @@ def tela_usuarios(janela):
 
         tabela.delete(item)
 
-    botoes_frame = tk.Frame(frame, bg="#fffaf0")
+    # Botões de ação
+    botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
     tk.Button(botoes_frame, text="Salvar Usuário 💾", bg="#339966", fg="white",
@@ -122,27 +163,36 @@ def tela_usuarios(janela):
     tk.Button(botoes_frame, text="Exportar CSV 📁", bg="#0059b3", fg="white",
               font=("Helvetica", 12, "bold"), command=exportar_csv).pack(side="left", padx=10)
 
-    tabela_frame = tk.Frame(frame, bg="#fffaf0", bd=2, relief="groove")
+    # Definição da tabela e scrolls
+    tabela_frame = tk.Frame(frame, bg="#e6f2ff", bd=2, relief="groove")
     tabela_frame.pack(padx=20, pady=15, fill="both", expand=True)
 
     colunas = list(campos.keys()) + ["Data de Cadastro"]
 
+    # Estilo para a tabela
     style = ttk.Style()
     style.theme_use("default")
-    style.configure("Treeview", background="#fffaf0", foreground="black", rowheight=25, fieldbackground="#fffaf0")
-    style.configure("Treeview.Heading", background="#00a7cc", foreground="white", font=("Helvetica", 12, "bold"))
+    style.configure("Treeview", background="#e6f2ff", foreground="black", rowheight=25, fieldbackground="#e6f2ff")
+    style.configure("Treeview.Heading", background="#006699", foreground="white", font=("Helvetica", 12, "bold"))
 
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
     for col in colunas:
         tabela.heading(col, text=col)
         tabela.column(col, width=130, anchor="center")
 
-    scroll = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
-    tabela.configure(yscrollcommand=scroll.set)
+    # Scroll vertical
+    scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
+    scroll_y.pack(side="right", fill="y")
+    tabela.configure(yscrollcommand=scroll_y.set)
+
+    # Scroll horizontal
+    scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
+    scroll_x.pack(side="bottom", fill="x")
+    tabela.configure(xscrollcommand=scroll_x.set)
 
     tabela.pack(side="left", fill="both", expand=True)
-    scroll.pack(side="right", fill="y")
 
+    # Função para carregar usuários na tabela
     def carregar_usuarios():
         tabela.delete(*tabela.get_children())
         try:
@@ -155,3 +205,4 @@ def tela_usuarios(janela):
             pass
 
     carregar_usuarios()
+

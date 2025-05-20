@@ -122,93 +122,80 @@ def main_app():
 def tela_login():
     login_win = tk.Tk()
     login_win.title("🔐 Login - Jassy Gestão")
-    login_win.geometry("500x500")
-    login_win.configure(bg="#dde7f0")
+    login_win.geometry("400x550")
+    login_win.configure(bg="#1e1e2f")
     login_win.resizable(False, False)
 
-    # Fundo com cor suave
-    background = tk.Frame(login_win, bg="#dde7f0")
-    background.place(relwidth=1, relheight=1)
+    # Fundo com gradiente
+    login_win.canvas = tk.Canvas(login_win, width=400, height=550, bg="#1e1e2f", bd=0, highlightthickness=0)
+    login_win.canvas.pack()
 
-    # Card central
-    card = tk.Frame(background, bg="white", bd=0, relief="ridge")
-    card.place(relx=0.5, rely=0.5, anchor="center", width=380, height=400)
+    # Gradiente de fundo
+    login_win.canvas.create_rectangle(0, 0, 400, 550, fill="#5c6bc0", outline="")
 
-    # Título
-    tk.Label(card, text="👋 Bem-vindo ao Jassy", font=("Segoe UI", 16, "bold"),
-             bg="white", fg="#2c3e50").pack(pady=(20, 5))
+    # Card de login centralizado
+    card = tk.Frame(login_win, bg="white", bd=0, relief="solid", padx=20, pady=20)
+    card.place(relx=0.5, rely=0.5, anchor="center")
 
-    tk.Label(card, text="Acesse sua conta para continuar", font=("Segoe UI", 10),
-             bg="white", fg="#7f8c8d").pack()
+    # Título do login
+    tk.Label(card, text="🚀 Bem-vindo ao Jassy", font=("Arial", 18, "bold"), fg="#3f51b5").pack(pady=10)
 
-    # Campo usuário
-    frame_usuario = tk.Frame(card, bg="white")
-    frame_usuario.pack(padx=30, pady=(30, 10), fill="x")
+    # Campos de Login
+    tk.Label(card, text="Usuário", font=("Arial", 12), fg="#444").pack(pady=5)
+    entry_usuario = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", fg="#555", bg="#f0f0f5", insertbackground='black')
+    entry_usuario.pack(pady=10, ipady=6)
+    entry_usuario.bind("<FocusIn>", lambda event: entry_usuario.config(bg="#e8eaf6"))
+    entry_usuario.bind("<FocusOut>", lambda event: entry_usuario.config(bg="#f0f0f5"))
 
-    tk.Label(frame_usuario, text="👤 Usuário", bg="white", anchor="w",
-             font=("Segoe UI", 10, "bold")).pack(fill="x")
-    entry_usuario = tk.Entry(frame_usuario, font=("Segoe UI", 10), bd=1, relief="solid")
-    entry_usuario.pack(fill="x", ipady=6)
+    tk.Label(card, text="Senha", font=("Arial", 12), fg="#444").pack(pady=5)
+    entry_senha = tk.Entry(card, font=("Arial", 12), bd=2, relief="solid", show="*", fg="#555", bg="#f0f0f5", insertbackground='black')
+    entry_senha.pack(pady=10, ipady=6)
+    entry_senha.bind("<FocusIn>", lambda event: entry_senha.config(bg="#e8eaf6"))
+    entry_senha.bind("<FocusOut>", lambda event: entry_senha.config(bg="#f0f0f5"))
 
-    # Campo senha
-    frame_senha = tk.Frame(card, bg="white")
-    frame_senha.pack(padx=30, pady=(10, 5), fill="x")
-
-    tk.Label(frame_senha, text="🔒 Senha", bg="white", anchor="w",
-             font=("Segoe UI", 10, "bold")).pack(fill="x")
-
-    senha_frame = tk.Frame(frame_senha, bg="white")
-    senha_frame.pack(fill="x")
-
-    entry_senha = tk.Entry(senha_frame, font=("Segoe UI", 10), show="*", bd=1, relief="solid")
-    entry_senha.pack(side="left", fill="x", expand=True, ipady=6)
-
+    # Função para mostrar/ocultar senha
     def toggle_senha():
-        if entry_senha.cget('show') == "":
-            entry_senha.config(show="*")
-            btn_ver_senha.config(text="👁️")
-        else:
+        if entry_senha.cget('show') == "*":
             entry_senha.config(show="")
-            btn_ver_senha.config(text="🙈")
+        else:
+            entry_senha.config(show="*")
 
-    btn_ver_senha = tk.Button(senha_frame, text="👁️", bg="white", relief="flat",
-                              command=toggle_senha, font=("Segoe UI", 9))
-    btn_ver_senha.pack(side="left", padx=5)
+    # Botão de "mostrar senha"
+    tk.Checkbutton(card, text="Mostrar senha", command=toggle_senha, font=("Arial", 10), fg="#3f51b5", selectcolor="#5c6bc0").pack(pady=5)
 
     # Mensagem de erro
-    lbl_erro = tk.Label(card, text="", font=("Segoe UI", 9), fg="#e74c3c", bg="white")
-    lbl_erro.pack(pady=(5, 0))
+    lbl_erro = tk.Label(card, text="", fg="red", font=("Arial", 10))
+    lbl_erro.pack(pady=5)
 
-    # Botão de login com estilo
-    def on_enter(e):
-        btn_login.config(bg="#2c3e50")
-
-    def on_leave(e):
-        btn_login.config(bg="#2980b9")
-
+    # Função para validar login
     def validar_login():
         usuario = entry_usuario.get().strip()
         senha = entry_senha.get().strip()
+
+        if usuario == "" or senha == "":
+            lbl_erro.config(text="❌ Usuário e senha não podem estar vazios")
+            return
+
         if usuario == "matheus" and senha == "123456":
             login_win.destroy()
-            main_app()
+            main_app()  # Inicia o sistema principal
         else:
             lbl_erro.config(text="❌ Usuário ou senha inválidos")
 
-    btn_login = tk.Button(card, text="Entrar", font=("Segoe UI", 11, "bold"), bg="#2980b9",
-                          fg="white", relief="flat", command=validar_login)
-    btn_login.pack(pady=(20, 5), ipadx=20, ipady=6)
-    btn_login.bind("<Enter>", on_enter)
-    btn_login.bind("<Leave>", on_leave)
+    # Botão de Login com efeito de hover
+    def on_enter(event):
+        login_button.config(bg="#3f51b5", fg="white")
 
-    # Rodapé
-    tk.Label(card, text="🔸 Jassy Gestão © 2025", font=("Segoe UI", 9),
-             fg="#bdc3c7", bg="white").pack(side="bottom", pady=10)
+    def on_leave(event):
+        login_button.config(bg="white", fg="#3f51b5")
+
+    login_button = tk.Button(card, text="Login", font=("Arial", 14), width=20, bg="white", fg="#3f51b5", command=validar_login, relief="solid", bd=2)
+    login_button.pack(pady=20)
+    login_button.bind("<Enter>", on_enter)
+    login_button.bind("<Leave>", on_leave)
 
     login_win.mainloop()
 
 
-
-# Início do sistema
-if __name__ == "__main__":
-    tela_login()
+# Inicia a tela de login
+tela_login()

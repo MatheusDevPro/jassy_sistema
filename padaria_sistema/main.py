@@ -37,10 +37,9 @@ from gui.adm.personalizacao_interface import tela_personalizacao_interface
 from gui.adm.integracoes import tela_integracoes
 from gui.estoque.requisicao_compras import tela_requisicao_compras
 from gui.estoque.baixa_estoque import tela_baixa_estoque
-
-# Novas telas exemplo (você precisa criar esses módulos)
-# from gui.rh.gestao_pessoal import tela_gestao_pessoal
-# from gui.rh.folha_pagamento import tela_folha_pagamento
+from gui.RH.gestao_pessoal import tela_gestao_pessoal
+from gui.RH.folha_pagamento import tela_folha_pagamento
+from gui.RH.controle_ponto import tela_controle_ponto
 # from gui.crm.gestao_oportunidades import tela_gestao_oportunidades
 # from gui.producao.chamados import tela_chamados_producao
 # from gui.marketing.campanhas import tela_campanhas_marketing
@@ -125,9 +124,9 @@ def main_app():
 
     # Novo Menu RH (Recursos Humanos)
     menu_rh = tk.Menu(menu_bar, tearoff=0)
-    menu_rh.add_command(label="👥 Gestão de Pessoal", command=placeholder)  # tela_gestao_pessoal
-    menu_rh.add_command(label="🧾 Folha de Pagamento", command=placeholder)  # tela_folha_pagamento
-    menu_rh.add_command(label="📅 Controle de Ponto", command=placeholder)
+    menu_rh.add_command(label="👥 Gestão de Pessoal", command=lambda: tela_gestao_pessoal(janela))
+    menu_rh.add_command(label="🧾 Folha de Pagamento", command=lambda: tela_folha_pagamento(janela))
+    menu_rh.add_command(label="📅 Controle de Ponto", command=lambda:tela_controle_ponto(janela))
     menu_rh.add_command(label="📊 Relatórios RH", command=placeholder)
     menu_bar.add_cascade(label="👔 RH", menu=menu_rh)
 

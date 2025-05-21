@@ -41,7 +41,9 @@ from gui.RH.gestao_pessoal import tela_gestao_pessoal
 from gui.RH.folha_pagamento import tela_folha_pagamento
 from gui.RH.controle_ponto import tela_controle_ponto
 from gui.RH.relatorios_rh import tela_relatorios_rh
-# from gui.crm.gestao_oportunidades import tela_gestao_oportunidades
+from gui.CRM.gestao_oportunidades import tela_gestao_oportunidades
+from gui.CRM.contatos_historico import tela_contatos_historico
+from gui.CRM.agenda_compromissos import tela_agenda_compromissos
 # from gui.producao.chamados import tela_chamados_producao
 # from gui.marketing.campanhas import tela_campanhas_marketing
 # from gui.suporte.helpdesk import tela_helpdesk
@@ -133,9 +135,9 @@ def main_app():
 
     # Novo Menu CRM / Projetos
     menu_crm = tk.Menu(menu_bar, tearoff=0)
-    menu_crm.add_command(label="📇 Gestão de Oportunidades", command=placeholder)  # tela_gestao_oportunidades
-    menu_crm.add_command(label="📞 Contatos e Histórico", command=placeholder)
-    menu_crm.add_command(label="📅 Agenda e Compromissos", command=placeholder)
+    menu_crm.add_command(label="📇 Gestão de Oportunidades", command=lambda:tela_gestao_oportunidades(janela))  # tela_gestao_oportunidades
+    menu_crm.add_command(label="📞 Contatos e Histórico", command=lambda: tela_contatos_historico(janela))
+    menu_crm.add_command(label="📅 Agenda e Compromissos", command=lambda: tela_agenda_compromissos(janela))
     menu_crm.add_command(label="📊 Relatórios CRM", command=placeholder)
     menu_bar.add_cascade(label="📊 CRM / Projetos", menu=menu_crm)
 

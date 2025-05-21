@@ -9,7 +9,8 @@ def calcular_liquido(salario_base, adicionais, descontos):
 
 def tela_folha_pagamento(janela):
     for widget in janela.winfo_children():
-        widget.destroy()
+        if widget.winfo_class() != 'Menu':
+          widget.destroy()
 
     frame = tk.Frame(janela, bg="#f8f8ff")
     frame.pack(fill="both", expand=True)

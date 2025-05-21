@@ -40,6 +40,7 @@ from gui.estoque.baixa_estoque import tela_baixa_estoque
 from gui.RH.gestao_pessoal import tela_gestao_pessoal
 from gui.RH.folha_pagamento import tela_folha_pagamento
 from gui.RH.controle_ponto import tela_controle_ponto
+from gui.RH.relatorios_rh import tela_relatorios_rh
 # from gui.crm.gestao_oportunidades import tela_gestao_oportunidades
 # from gui.producao.chamados import tela_chamados_producao
 # from gui.marketing.campanhas import tela_campanhas_marketing
@@ -127,7 +128,7 @@ def main_app():
     menu_rh.add_command(label="👥 Gestão de Pessoal", command=lambda: tela_gestao_pessoal(janela))
     menu_rh.add_command(label="🧾 Folha de Pagamento", command=lambda: tela_folha_pagamento(janela))
     menu_rh.add_command(label="📅 Controle de Ponto", command=lambda:tela_controle_ponto(janela))
-    menu_rh.add_command(label="📊 Relatórios RH", command=placeholder)
+    menu_rh.add_command(label="📊 Relatórios RH", command=lambda: tela_relatorios_rh(janela))
     menu_bar.add_cascade(label="👔 RH", menu=menu_rh)
 
     # Novo Menu CRM / Projetos

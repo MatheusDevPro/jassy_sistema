@@ -2,96 +2,194 @@ import tkinter as tk
 from tkinter import ttk
 
 def mostrar_home(janela):
+    style = ttk.Style(janela)
+    style.theme_use('clam')
+
+    # Limpa conteúdo anterior (exceto menu)
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
             widget.destroy()
 
-    janela.configure(bg="#f0f4f8")
-    frame = tk.Frame(janela, bg="#f0f4f8")
-    frame.pack(fill="both", expand=True)
+    janela.configure(bg="#f9f9f9")
+    janela.geometry("900x600")
 
-    # Título
-    titulo = tk.Label(frame, text="🤖 Jessy - Gestão Integrada", font=("Segoe UI", 26, "bold"),
-                      bg="#f0f4f8", fg="#2c3e50")
-    titulo.pack(pady=(30, 10))
+    # --- Menu lateral ---
+    menu_lateral = ttk.Frame(janela, width=180, relief="flat", style="Menu.TFrame")
+    menu_lateral.pack(side="left", fill="y")
 
-    subtitulo = tk.Label(frame, text="Tecnologia para impulsionar seu negócio", font=("Segoe UI", 15, "italic"),
-                         bg="#f0f4f8", fg="#34495e")
-    subtitulo.pack()
+    # Estilo do menu lateral
+    style.configure("Menu.TFrame", background="#f0f0f0")
+    style.configure("Menu.TButton",
+                    background="#f0f0f0", foreground="#555",
+                    font=("Segoe UI", 11),
+                    padding=8)
+    style.map("Menu.TButton",
+              background=[('active', '#d7d7d7')],
+              foreground=[('active', '#222')])
 
-    # Cards de atalho
-    card_frame = tk.Frame(frame, bg="#f0f4f8")
-    card_frame.pack(pady=20)
+    # Logo/Title no menu lateral
+    logo = ttk.Label(menu_lateral, text="🤖 Jessy", font=("Segoe UI", 20, "bold"), background="#f0f0f0", foreground="#333")
+    logo.pack(pady=30)
 
-    def criar_card(texto, emoji, cor):
-        card = tk.Frame(card_frame, bg=cor, width=140, height=100, bd=1, relief="ridge")
-        card.pack_propagate(0)
-        label = tk.Label(card, text=f"{emoji}\n{texto}", font=("Segoe UI", 11, "bold"),
-                         fg="white", bg=cor, justify="center")
-        label.pack(expand=True)
+    # Botões do menu lateral
+    def botao_menu(texto):
+        btn = ttk.Button(menu_lateral, text=texto, style="Menu.TButton")
+        btn.bind("<Enter>", lambda e: btn.configure(cursor="hand2"))
+        btn.bind("<Leave>", lambda e: btn.configure(cursor=""))
+        return btn
+
+    botoes = ["🏠 Home", "📦 Estoque", "🛒 Vendas", "💰 Financeiro", "📈 Relatórios", "⚙ Configurações"]
+    for b in botoes:
+        botao_menu(b).pack(fill="x", padx=20, pady=6)
+
+    # --- Conteúdo principal ---
+    conteudo = ttk.Frame(janela, padding=30, style="Content.TFrame")
+    conteudo.pack(side="left", fill="both", expand=True)
+
+    # Estilo conteúdo
+    style.configure("Content.TFrame", background="#f9f9f9")
+
+    # Container centralizado (usando pack com expand + anchor center)
+    centralizador = ttk.Frame(conteudo, style="Content.TFrame")
+    centralizador.pack(expand=True)
+    
+    # Título e subtítulo
+    titulo = ttk.Label(centralizador, text="Jessy - Gestão Integrada",
+                       font=("Segoe UI", 28, "bold"), foreground="#444", background="#f9f9f9")
+    titulo.pack(anchor="center")
+
+    subtitulo = ttk.Label(centralizador, text="Tecnologia para impulsionar seu negócio",
+                          font=("Segoe UI", 14, "italic"), foreground="#777", background="#f9f9f9")
+    subtitulo.pack(anchor="center", pady=(5, 30))
+
+    # Cards interativos
+    cards_frame = ttk.Frame(centralizador, style="Content.TFrame")
+    cards_frame.pack()
+
+    def criar_card(parent, texto, emoji, cor):
+        card = ttk.Frame(parent, width=160, height=110)
+        card.pack_propagate(False)
+        card.grid_propagate(False)
+
+        # Cor neutra com destaque suave (usar bg claro e borda)
+        card_style_name = f"{texto}.TFrame"
+        style.configure(card_style_name,
+                        background=cor,
+                        relief="flat")
+        card.configure(style=card_style_name)
+
+        label = ttk.Label(card, text=f"{emoji}\n{texto}",
+                          font=("Segoe UI", 13, "bold"),
+                          foreground="white",
+                          background=cor,
+                          anchor="center", justify="center")
+        label.pack(expand=True, fill="both")
+
+        # Cursor e hover
+        def enter(e):
+            card.configure(relief="raised")
+            card.configure(cursor="hand2")
+        def leave(e):
+            card.configure(relief="flat")
+            card.configure(cursor="")
+        card.bind("<Enter>", enter)
+        card.bind("<Leave>", leave)
+
+        def click_event(event):
+            print(f"{texto} clicado!")
+        card.bind("<Button-1>", click_event)
+        label.bind("<Button-1>", click_event)
+
         return card
 
-    criar_card("Estoque", "📦", "#2980b9").grid(row=0, column=0, padx=10)
-    criar_card("Vendas", "🛒", "#27ae60").grid(row=0, column=1, padx=10)
-    criar_card("Financeiro", "💰", "#d35400").grid(row=0, column=2, padx=10)
-    criar_card("Relatórios", "📈", "#8e44ad").grid(row=0, column=3, padx=10)
+    # Cores neutras mais suaves e elegantes
+    cores_cards = ["#4a90e2", "#50b948", "#f39c12", "#8e44ad"]
+    textos = ["Estoque", "Vendas", "Financeiro", "Relatórios"]
+    emojis = ["📦", "🛒", "💰", "📈"]
 
-    # Painel visual com gráficos
-    painel = tk.Frame(frame, bg="white", bd=2, relief="groove")
-    painel.pack(padx=40, pady=20, fill="both", expand=False)
+    for i, (t, e, c) in enumerate(zip(textos, emojis, cores_cards)):
+        criar_card(cards_frame, t, e, c).grid(row=0, column=i, padx=12)
 
-    titulo_painel = tk.Label(painel, text="📊 Indicadores Rápidos", font=("Segoe UI", 14, "bold"),
-                             bg="white", fg="#2c3e50")
-    titulo_painel.pack(pady=(10, 0))
+    # Separador
+    sep = ttk.Separator(centralizador, orient="horizontal")
+    sep.pack(fill="x", pady=25)
 
-    canvas = tk.Canvas(painel, width=520, height=230, bg="#ffffff", highlightthickness=0)
-    canvas.pack(pady=15)
+    # Indicadores gráficos simplificados
+    indicadores_frame = ttk.Frame(centralizador, style="Content.TFrame")
+    indicadores_frame.pack(fill="x")
 
+    titulo_indicador = ttk.Label(indicadores_frame, text="Indicadores Rápidos",
+                                 font=("Segoe UI", 18, "bold"),
+                                 foreground="#444", background="#f9f9f9")
+    titulo_indicador.pack(anchor="center", pady=(0, 15))
+
+    canvas = tk.Canvas(indicadores_frame, height=220, bg="#fff", highlightthickness=1, highlightbackground="#ddd")
+    canvas.pack(fill="x", padx=30)
+
+    # Barras indicadores com cores neutras e vibrantes
     barra_cores = ["#5dade2", "#58d68d", "#f5b041", "#af7ac5", "#ec7063"]
     alturas = [100, 140, 90, 120, 110]
     rotulos = ["Vendas", "Estoque", "Compras", "Pedidos", "Clientes"]
 
     for i, (altura, cor, rotulo) in enumerate(zip(alturas, barra_cores, rotulos)):
-        x0 = 60 + i * 85
+        x0 = 80 + i * 90
         y0 = 180 - altura
-        x1 = x0 + 40
+        x1 = x0 + 45
         y1 = 180
-        canvas.create_rectangle(x0, y0, x1, y1, fill=cor, width=0)
-        canvas.create_text(x0 + 20, y1 + 15, text=rotulo, font=("Segoe UI", 10), fill="#34495e")
+        canvas.create_rectangle(x0, y0, x1, y1, fill=cor, width=0, outline="#444")
+        canvas.create_text(x0 + 22, y1 + 20, text=rotulo, font=("Segoe UI", 10), fill="#444")
 
-    canvas.create_text(260, 215, text="Gráfico ilustrativo de desempenho", font=("Segoe UI", 9), fill="#888")
+    canvas.create_text(350, 210, text="Gráfico ilustrativo de desempenho", font=("Segoe UI", 9), fill="#777")
 
-    # Bloco de Notificações
-    notificacoes = tk.LabelFrame(frame, text="🔔 Notificações do Sistema", font=("Segoe UI", 12, "bold"),
-                                 bg="#fefefe", fg="#2c3e50", padx=10, pady=10)
-    notificacoes.pack(padx=40, pady=10, fill="x")
+    # Notificações estilo card
+    notif_frame = ttk.LabelFrame(centralizador, text="Notificações do Sistema", padding=10)
+    notif_frame.pack(fill="x", padx=30, pady=20)
 
-    tk.Label(notificacoes, text="⚠️  Estoque de Farinha está abaixo do mínimo!", font=("Segoe UI", 10),
-             bg="#fefefe", fg="#c0392b").pack(anchor="w", pady=2)
+    notificacoes = [
+        ("⚠️ Estoque de Farinha está abaixo do mínimo!", "#c0392b"),
+        ("✅ Backup automático realizado hoje às 02:00.", "#27ae60"),
+        ("📦 Novas requisições aguardando aprovação.", "#2980b9"),
+    ]
 
-    tk.Label(notificacoes, text="✅  Backup automático realizado hoje às 02:00.", font=("Segoe UI", 10),
-             bg="#fefefe", fg="#27ae60").pack(anchor="w", pady=2)
+    for msg, cor in notificacoes:
+        label = ttk.Label(notif_frame, text=msg, foreground=cor, font=("Segoe UI", 11))
+        label.pack(anchor="w", pady=2)
 
-    tk.Label(notificacoes, text="📦  Novas requisições aguardando aprovação.", font=("Segoe UI", 10),
-             bg="#fefefe", fg="#2980b9").pack(anchor="w", pady=2)
+    # Resumo rápido com cards
+    resumo_frame = ttk.Frame(centralizador, style="Content.TFrame")
+    resumo_frame.pack(fill="x", pady=10)
 
-    # Resumo Rápido
-    resumo_frame = tk.Frame(frame, bg="#f0f4f8")
-    resumo_frame.pack(pady=(10, 30))
+    def resumo_card(parent, titulo, valor, cor):
+        card = ttk.Frame(parent, width=160, height=70)
+        card.pack_propagate(False)
+        card.grid_propagate(False)
 
-    def resumo_dado(titulo, valor, cor):
-        bloco = tk.Frame(resumo_frame, bg=cor, width=150, height=60, bd=1, relief="solid")
-        bloco.pack_propagate(0)
-        tk.Label(bloco, text=titulo, font=("Segoe UI", 10, "bold"), fg="white", bg=cor).pack()
-        tk.Label(bloco, text=valor, font=("Segoe UI", 14), fg="white", bg=cor).pack()
-        return bloco
+        style_name = f"{titulo}.TFrame"
+        style.configure(style_name, background=cor, relief="flat")
+        card.configure(style=style_name)
 
-    resumo_dado("🧾 Produtos", "128", "#3498db").grid(row=0, column=0, padx=10)
-    resumo_dado("📊 Vendas Hoje", "R$ 1.430,00", "#2ecc71").grid(row=0, column=1, padx=10)
-    resumo_dado("🕒 Pendentes", "5 Pedidos", "#f39c12").grid(row=0, column=2, padx=10)
-    resumo_dado("👥 Clientes", "74 ativos", "#9b59b6").grid(row=0, column=3, padx=10)
+        ttk.Label(card, text=titulo, foreground="white", font=("Segoe UI", 11, "bold"), background=cor).pack(anchor="center")
+        ttk.Label(card, text=valor, foreground="white", font=("Segoe UI", 15, "bold"), background=cor).pack(anchor="center")
+        return card
 
-    # Rodapé
-    rodape = tk.Label(frame, text="🛈 Sistema atualizado com as últimas melhorias - Versão 1.2",
-                      font=("Segoe UI", 9), bg="#f0f4f8", fg="#7f8c8d")
-    rodape.pack(pady=(5, 20))
+    resumo_itens = [
+        ("🧾 Produtos", "128", "#3498db"),
+        ("📊 Vendas Hoje", "R$ 1.430,00", "#2ecc71"),
+        ("🕒 Pendentes", "5 Pedidos", "#f39c12"),
+        ("👥 Clientes", "74 ativos", "#9b59b6"),
+    ]
+
+    for i, (t, v, c) in enumerate(resumo_itens):
+        resumo_card(resumo_frame, t, v, c).grid(row=0, column=i, padx=12)
+
+    # Rodapé discreto
+    rodape = ttk.Label(janela, text="🛈 Sistema atualizado com as últimas melhorias - Versão 1.2",
+                       font=("Segoe UI", 9), foreground="#999", background="#f9f9f9")
+    rodape.pack(side="bottom", fill="x", pady=5)
+
+# Exemplo de uso
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Sistema Jessy - Home")
+    mostrar_home(root)
+    root.mainloop()

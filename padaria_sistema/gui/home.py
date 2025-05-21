@@ -11,7 +11,7 @@ def mostrar_home(janela):
             widget.destroy()
 
     janela.configure(bg="#f9f9f9")
-    janela.geometry("900x600")
+    janela.geometry("1280x980")
 
     # --- Menu lateral ---
     menu_lateral = ttk.Frame(janela, width=180, relief="flat", style="Menu.TFrame")

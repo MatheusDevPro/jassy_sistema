@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
+
 # Importações do seu sistema (exemplo: algumas já definidas)
 from gui.home import mostrar_home
 from gui.cadastro.clientes import tela_clientes
@@ -9,7 +10,6 @@ from gui.movimentacao.vendas import tela_vendas
 from gui.cadastro.funcionarios import tela_funcionarios
 from gui.cadastro.fornecedores import tela_fornecedores
 from gui.financeiro.financeiro import tela_financeiro
-from gui.cadastro.usuarios import tela_usuarios
 from gui.movimentacao.compras import tela_compras
 from gui.movimentacao.entrada_estoque import tela_entrada_estoque
 from gui.movimentacao.saida_estoque import tela_saida_estoque
@@ -53,6 +53,7 @@ from gui.Marketing.analise_mercado import tela_analise_mercado
 from gui.Marketing.relatorios_marketing import tela_relatorios_marketing
 from gui.suporte.helpdesk import tela_helpdesk
 from gui.suporte.contatos_suporte import contatos_suporte
+from gui.adm.cadastro_usuario import tela_cadastro_usuario
 
 def placeholder():
     messagebox.showinfo("Em Desenvolvimento", "Esta funcionalidade ainda não foi implementada.")
@@ -84,7 +85,6 @@ def main_app():
     menu_cadastros.add_command(label="📦 Produtos", command=lambda: mostrar_tela(janela, tela_produtos, "Produtos"))
     menu_cadastros.add_command(label="👨‍🍳 Funcionários", command=lambda: mostrar_tela(janela, tela_funcionarios, "Funcionários"))
     menu_cadastros.add_command(label="📨 Fornecedores", command=lambda: mostrar_tela(janela, tela_fornecedores, "Fornecedores"))
-    menu_cadastros.add_command(label="🔐 Usuários / Permissões", command=lambda: mostrar_tela(janela, tela_usuarios, "Usuários e Permissões"))
     menu_bar.add_cascade(label="📋 Cadastros", menu=menu_cadastros)
 
     # Menu Movimentações
@@ -164,13 +164,14 @@ def main_app():
     # Novo Menu Suporte / Helpdesk
     menu_suporte = tk.Menu(menu_bar, tearoff=0)
     menu_suporte.add_command(label="🎫 Helpdesk", command=lambda: tela_helpdesk(janela))  # tela_helpdesk
-    menu_suporte.add_command(label="📞 Contatos Suporte", command=contatos_suporte)
+    menu_suporte.add_command(label="📞 Contatos Suporte", command=lambda: contatos_suporte(janela))
     menu_bar.add_cascade(label="🛠️ Suporte", menu=menu_suporte)
 
     # Menu Administração / Configurações
     menu_administracao = tk.Menu(menu_bar, tearoff=0)
     menu_administracao.add_command(label="⚙️ Parâmetros do Sistema", command=lambda: mostrar_tela(janela, tela_parametros_sistema, "Parâmetros do Sistema"))
     menu_administracao.add_command(label="🔒 Permissões de Acesso", command=lambda: mostrar_tela(janela, tela_permissoes_acesso, "Permissões de Acesso"))
+    menu_administracao.add_command(label="🔒 cadastro de usuario", command=lambda: mostrar_tela(janela, tela_cadastro_usuario, "cadastro de usuario"))
     menu_administracao.add_command(label="🎨 Personalização da Interface", command=lambda: mostrar_tela(janela, tela_personalizacao_interface, "Personalização da Interface"))
     menu_administracao.add_command(label="🔄 Backup e Restauração", command=lambda: mostrar_tela(janela, tela_backup, "Backup e Restauração"))
     menu_administracao.add_command(label="🔗 Integrações", command=lambda: mostrar_tela(janela, tela_integracoes, "Integrações"))

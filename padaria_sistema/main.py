@@ -49,7 +49,10 @@ from gui.producao.chamados_producao import tela_chamados_producao
 from gui.producao.ordem_producao import tela_ordem_producao
 from gui.producao.controle_qualidade import tela_controle_qualidade
 from gui.Marketing.campanhas_marketing  import tela_campanhas_marketing
-# from gui.suporte.helpdesk import tela_helpdesk
+from gui.Marketing.analise_mercado import tela_analise_mercado
+from gui.Marketing.relatorios_marketing import tela_relatorios_marketing
+from gui.suporte.helpdesk import tela_helpdesk
+from gui.suporte.contatos_suporte import contatos_suporte
 
 def placeholder():
     messagebox.showinfo("Em Desenvolvimento", "Esta funcionalidade ainda não foi implementada.")
@@ -154,14 +157,14 @@ def main_app():
     # Novo Menu Marketing
     menu_marketing = tk.Menu(menu_bar, tearoff=0)
     menu_marketing.add_command(label="📢 Campanhas", command=lambda: tela_campanhas_marketing(janela))  # tela_campanhas_marketing
-    menu_marketing.add_command(label="📊 Análise de Mercado", command=placeholder)
-    menu_marketing.add_command(label="📈 Relatórios Marketing", command=placeholder)
+    menu_marketing.add_command(label="📊 Análise de Mercado", command=lambda: tela_analise_mercado(janela))
+    menu_marketing.add_command(label="📈 Relatórios Marketing", command=lambda: tela_relatorios_marketing(janela))
     menu_bar.add_cascade(label="📣 Marketing", menu=menu_marketing)
 
     # Novo Menu Suporte / Helpdesk
     menu_suporte = tk.Menu(menu_bar, tearoff=0)
-    menu_suporte.add_command(label="🎫 Helpdesk", command=placeholder)  # tela_helpdesk
-    menu_suporte.add_command(label="📞 Contatos Suporte", command=placeholder)
+    menu_suporte.add_command(label="🎫 Helpdesk", command=lambda: tela_helpdesk(janela))  # tela_helpdesk
+    menu_suporte.add_command(label="📞 Contatos Suporte", command=contatos_suporte)
     menu_bar.add_cascade(label="🛠️ Suporte", menu=menu_suporte)
 
     # Menu Administração / Configurações

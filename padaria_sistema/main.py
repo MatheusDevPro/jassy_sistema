@@ -44,8 +44,11 @@ from gui.RH.relatorios_rh import tela_relatorios_rh
 from gui.CRM.gestao_oportunidades import tela_gestao_oportunidades
 from gui.CRM.contatos_historico import tela_contatos_historico
 from gui.CRM.agenda_compromissos import tela_agenda_compromissos
-# from gui.producao.chamados import tela_chamados_producao
-# from gui.marketing.campanhas import tela_campanhas_marketing
+from gui.CRM.relatorios_crm import tela_relatorios_crm
+from gui.producao.chamados_producao import tela_chamados_producao
+from gui.producao.ordem_producao import tela_ordem_producao
+from gui.producao.controle_qualidade import tela_controle_qualidade
+from gui.Marketing.campanhas_marketing  import tela_campanhas_marketing
 # from gui.suporte.helpdesk import tela_helpdesk
 
 def placeholder():
@@ -138,19 +141,19 @@ def main_app():
     menu_crm.add_command(label="📇 Gestão de Oportunidades", command=lambda:tela_gestao_oportunidades(janela))  # tela_gestao_oportunidades
     menu_crm.add_command(label="📞 Contatos e Histórico", command=lambda: tela_contatos_historico(janela))
     menu_crm.add_command(label="📅 Agenda e Compromissos", command=lambda: tela_agenda_compromissos(janela))
-    menu_crm.add_command(label="📊 Relatórios CRM", command=placeholder)
+    menu_crm.add_command(label="📊 Relatórios CRM", command=lambda: tela_relatorios_crm(janela))
     menu_bar.add_cascade(label="📊 CRM / Projetos", menu=menu_crm)
 
     # Novo Menu Produção (caso tenha)
     menu_producao = tk.Menu(menu_bar, tearoff=0)
-    menu_producao.add_command(label="🛠️ Chamados Produção", command=placeholder)  # tela_chamados_producao
-    menu_producao.add_command(label="⚙️ Ordens de Produção", command=placeholder)
-    menu_producao.add_command(label="📋 Controle de Qualidade", command=placeholder)
+    menu_producao.add_command(label="🛠️ Chamados Produção", command=lambda: tela_chamados_producao(janela))  # tela_chamados_producao
+    menu_producao.add_command(label="⚙️ Ordens de Produção", command=lambda: tela_ordem_producao(janela))  # tela_ordem_producao
+    menu_producao.add_command(label="📋 Controle de Qualidade", command=lambda: tela_controle_qualidade(janela))
     menu_bar.add_cascade(label="🏭 Produção", menu=menu_producao)
 
     # Novo Menu Marketing
     menu_marketing = tk.Menu(menu_bar, tearoff=0)
-    menu_marketing.add_command(label="📢 Campanhas", command=placeholder)  # tela_campanhas_marketing
+    menu_marketing.add_command(label="📢 Campanhas", command=lambda: tela_campanhas_marketing(janela))  # tela_campanhas_marketing
     menu_marketing.add_command(label="📊 Análise de Mercado", command=placeholder)
     menu_marketing.add_command(label="📈 Relatórios Marketing", command=placeholder)
     menu_bar.add_cascade(label="📣 Marketing", menu=menu_marketing)

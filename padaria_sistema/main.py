@@ -54,6 +54,7 @@ from gui.Marketing.relatorios_marketing import tela_relatorios_marketing
 from gui.suporte.helpdesk import tela_helpdesk
 from gui.suporte.contatos_suporte import contatos_suporte
 from gui.adm.cadastro_usuario import tela_cadastro_usuario
+from gui.estoque.wms import tela_wms
 
 def placeholder():
     messagebox.showinfo("Em Desenvolvimento", "Esta funcionalidade ainda não foi implementada.")
@@ -102,6 +103,7 @@ def main_app():
     menu_estoque.add_command(label="🛠️ Ajuste de Inventário", command=lambda: mostrar_tela(janela, tela_ajuste_inventario, "Ajuste de Inventário"))
     menu_estoque.add_command(label="🛠️ Baixa de Estoque", command=lambda: mostrar_tela(janela, tela_baixa_estoque, "Baixa de Estoque"))
     menu_estoque.add_command(label="🛠️ Requisição de Compras", command=lambda: mostrar_tela(janela, tela_requisicao_compras, "Requisição de Compras"))
+    menu_estoque.add_command(label="📦 WMS", command=lambda: mostrar_tela(janela, tela_wms, "WMS"))
     menu_estoque.add_command(label="🔄 Transferência entre Depósitos", command=lambda: mostrar_tela(janela, tela_transferencia_depositos, "Transferência entre Depósitos"))
     menu_bar.add_cascade(label="📦 Estoque", menu=menu_estoque)
 

@@ -1,12 +1,27 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
-import os
-import csv
+import sqlite3
 import re
 from tkcalendar import DateEntry
 from datetime import datetime
 
+def criar_banco():
+    conn = sqlite3.connect("clientes.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT, cpf TEXT, data_nascimento TEXT, sexo TEXT, rg TEXT, data_cadastro TEXT,
+            cidade TEXT, estado TEXT, cep TEXT, bairro TEXT, numero TEXT,
+            complemento TEXT, data_validade TEXT, email TEXT, telefone TEXT, endereco TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 def tela_clientes(janela):
+    criar_banco()
+
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
             widget.destroy()
@@ -82,9 +97,19 @@ def tela_clientes(janela):
         if all(dados_dict.values()):
             if not validar_dados(dados_dict):
                 return
-            os.makedirs("dados", exist_ok=True)
-            with open("dados/clientes.txt", "a", encoding="utf-8") as arq:
-                arq.write(" | ".join(dados_dict.values()) + "\n")
+
+            conn = sqlite3.connect("clientes.db")
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO clientes (
+                    nome, cpf, data_nascimento, sexo, rg, data_cadastro,
+                    cidade, estado, cep, bairro, numero, complemento,
+                    data_validade, email, telefone, endereco
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, tuple(dados_dict.values()))
+            conn.commit()
+            conn.close()
+
             messagebox.showinfo("Sucesso", "Cliente salvo com sucesso.")
             for entrada in campos.values():
                 if isinstance(entrada, ttk.Combobox):
@@ -97,26 +122,11 @@ def tela_clientes(janela):
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
 
-    def exportar_csv():
-        try:
-            with open("dados/clientes.txt", "r", encoding="utf-8") as f:
-                linhas = [linha.strip().split("|") for linha in f if linha.strip()]
-            with open("dados/clientes.csv", "w", newline="", encoding="utf-8") as f_csv:
-                writer = csv.writer(f_csv)
-                writer.writerow(campos.keys())
-                writer.writerows(linhas)
-            messagebox.showinfo("Exportado", "Dados exportados para 'dados/clientes.csv'.")
-        except FileNotFoundError:
-            messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
-
     botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
     tk.Button(botoes_frame, text="💾 Salvar Cliente", bg="#339966", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=salvar_cliente).pack(side="left", padx=10)
-
-    tk.Button(botoes_frame, text="📁 Exportar dados", bg="#0059b3", fg="white",
-              font=("Helvetica", 12, "bold"), width=20, command=exportar_csv).pack(side="left", padx=10)
 
     tk.Button(botoes_frame, text="🔄 Atualizar Lista", bg="#ffcc00", fg="black",
               font=("Helvetica", 12, "bold"), width=20, command=lambda: carregar_clientes()).pack(side="left", padx=10)
@@ -132,7 +142,6 @@ def tela_clientes(janela):
         tabela.heading(col, text=col)
         tabela.column(col, width=130, anchor="center")
 
-    # Scrollbars vertical e horizontal
     scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
     scroll_x = ttk.Scrollbar(tabela_frame, orient="horizontal", command=tabela.xview)
     tabela.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
@@ -146,13 +155,11 @@ def tela_clientes(janela):
 
     def carregar_clientes():
         tabela.delete(*tabela.get_children())
-        try:
-            with open("dados/clientes.txt", "r", encoding="utf-8") as f:
-                for linha in f:
-                    valores = [v.strip() for v in linha.strip().split("|")]
-                    if len(valores) == len(colunas):
-                        tabela.insert("", "end", values=valores)
-        except FileNotFoundError:
-            pass
+        conn = sqlite3.connect("clientes.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT nome, cpf, data_nascimento, sexo, rg, data_cadastro, cidade, estado, cep, bairro, numero, complemento, data_validade, email, telefone, endereco FROM clientes")
+        for row in cursor.fetchall():
+            tabela.insert("", "end", values=row)
+        conn.close()
 
     carregar_clientes()

@@ -1,26 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
-import sqlite3
-import re
 from tkcalendar import DateEntry
 from datetime import datetime
-
-def criar_banco():
-    conn = sqlite3.connect("clientes.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS clientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT, cpf TEXT, data_nascimento TEXT, sexo TEXT, rg TEXT, data_cadastro TEXT,
-            cidade TEXT, estado TEXT, cep TEXT, bairro TEXT, numero TEXT,
-            complemento TEXT, data_validade TEXT, email TEXT, telefone TEXT, endereco TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+import re
 
 def tela_clientes(janela):
-    criar_banco()
+    clientes_lista = []
 
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
@@ -87,29 +72,27 @@ def tela_clientes(janela):
             return False
         return True
 
-    def salvar_cliente():
-        dados_dict = {
+    def obter_dados():
+        return {
             rotulo: entrada.get().strip() if not isinstance(entrada, DateEntry)
             else entrada.get_date().strftime("%d/%m/%Y")
             for rotulo, entrada in campos.items()
         }
 
-        if all(dados_dict.values()):
-            if not validar_dados(dados_dict):
+    def validar_campos():
+        dados = obter_dados()
+        if all(dados.values()):
+            if validar_dados(dados):
+                messagebox.showinfo("Validação", "Todos os dados são válidos.")
+        else:
+            messagebox.showwarning("Atenção", "Preencha todos os campos antes de validar.")
+
+    def salvar_cliente():
+        dados = obter_dados()
+        if all(dados.values()):
+            if not validar_dados(dados):
                 return
-
-            conn = sqlite3.connect("clientes.db")
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO clientes (
-                    nome, cpf, data_nascimento, sexo, rg, data_cadastro,
-                    cidade, estado, cep, bairro, numero, complemento,
-                    data_validade, email, telefone, endereco
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, tuple(dados_dict.values()))
-            conn.commit()
-            conn.close()
-
+            clientes_lista.append(dados)
             messagebox.showinfo("Sucesso", "Cliente salvo com sucesso.")
             for entrada in campos.values():
                 if isinstance(entrada, ttk.Combobox):
@@ -122,15 +105,47 @@ def tela_clientes(janela):
         else:
             messagebox.showwarning("Atenção", "Preencha todos os campos.")
 
+    def carregar_clientes(filtro=None):
+        tabela.delete(*tabela.get_children())
+        for cliente in clientes_lista:
+            if filtro:
+                nome = cliente["Nome"].lower()
+                cpf = cliente["CPF"]
+                if filtro not in nome and filtro not in cpf:
+                    continue
+            tabela.insert("", "end", values=tuple(cliente.values()))
+
+    # Botões principais
     botoes_frame = tk.Frame(frame, bg="#e6f2ff")
     botoes_frame.pack(pady=10)
 
     tk.Button(botoes_frame, text="💾 Salvar Cliente", bg="#339966", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=salvar_cliente).pack(side="left", padx=10)
 
-    tk.Button(botoes_frame, text="🔄 Atualizar Lista", bg="#ffcc00", fg="black",
-              font=("Helvetica", 12, "bold"), width=20, command=lambda: carregar_clientes()).pack(side="left", padx=10)
+    tk.Button(botoes_frame, text="✔️ Validar Dados", bg="#007acc", fg="white",
+              font=("Helvetica", 12, "bold"), width=20, command=validar_campos).pack(side="left", padx=10)
 
+    tk.Button(botoes_frame, text="🔄 Atualizar Lista", bg="#ffcc00", fg="black",
+              font=("Helvetica", 12, "bold"), width=20, command=carregar_clientes).pack(side="left", padx=10)
+
+    # Campo de busca
+    busca_frame = tk.Frame(frame, bg="#e6f2ff")
+    busca_frame.pack(pady=5)
+
+    tk.Label(busca_frame, text="🔍 Buscar por Nome ou CPF:", font=("Helvetica", 12),
+             bg="#e6f2ff", fg="#003d66").pack(side="left", padx=5)
+
+    entrada_busca = tk.Entry(busca_frame, width=40)
+    entrada_busca.pack(side="left", padx=5)
+
+    def buscar_cliente():
+        texto = entrada_busca.get().strip().lower()
+        carregar_clientes(filtro=texto)
+
+    tk.Button(busca_frame, text="Buscar", bg="#005580", fg="white",
+              font=("Helvetica", 10, "bold"), command=buscar_cliente).pack(side="left", padx=5)
+
+    # Tabela de clientes
     tabela_frame = tk.LabelFrame(frame, text="📋 Clientes Cadastrados", bg="#e6f2ff",
                                  font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
@@ -152,14 +167,5 @@ def tela_clientes(janela):
 
     tabela_frame.grid_rowconfigure(0, weight=1)
     tabela_frame.grid_columnconfigure(0, weight=1)
-
-    def carregar_clientes():
-        tabela.delete(*tabela.get_children())
-        conn = sqlite3.connect("clientes.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT nome, cpf, data_nascimento, sexo, rg, data_cadastro, cidade, estado, cep, bairro, numero, complemento, data_validade, email, telefone, endereco FROM clientes")
-        for row in cursor.fetchall():
-            tabela.insert("", "end", values=row)
-        conn.close()
 
     carregar_clientes()

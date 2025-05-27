@@ -15,7 +15,7 @@ def connect_db():
     try:
         conn = sqlite3.connect(DATABASE_NAME)
         # Permite acessar colunas por nome para debug, mas usaremos índices.
-        conn.row_factory = sqlite3.Row 
+        conn.row_factory = sqlite3.Row
         return conn
     except sqlite3.Error as e:
         messagebox.showerror("Erro de Banco de Dados", f"Não foi possível conectar ao banco de dados: {e}")
@@ -195,6 +195,11 @@ def tela_clientes(janela):
     campos_frame.pack(pady=10)
 
     sexos = ["Masculino", "Feminino", "Binário", "Não-binário", "Lésbica", "Gay", "Bissexual", "Outro"]
+    estados_brasileiros = [
+        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+        "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+        "SP", "SE", "TO"
+    ]
 
     # Dicionário para armazenar as referências aos campos de entrada
     # e um campo oculto para armazenar o ID do cliente selecionado para alteração
@@ -206,7 +211,7 @@ def tela_clientes(janela):
         "RG": tk.Entry(campos_frame, width=30),
         "Data de Cadastro": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
         "Cidade": tk.Entry(campos_frame, width=30),
-        "Estado": tk.Entry(campos_frame, width=30),
+        "Estado": ttk.Combobox(campos_frame, values=estados_brasileiros, width=28, state="readonly"), # Mantido como Combobox
         "CEP": tk.Entry(campos_frame, width=30),
         "Bairro": tk.Entry(campos_frame, width=30),
         "Número": tk.Entry(campos_frame, width=30),
@@ -218,7 +223,7 @@ def tela_clientes(janela):
     }
 
     # Adiciona uma variável Tkinter para armazenar o ID do cliente selecionado.
-    cliente_selecionado_id = tk.StringVar() 
+    cliente_selecionado_id = tk.StringVar()
 
     for i, (rotulo, entrada) in enumerate(campos.items()):
         linha = i // 2
@@ -230,7 +235,7 @@ def tela_clientes(janela):
     def validar_dados(dados_dict):
         """Valida os dados dos campos do formulário."""
         # Campos obrigatórios
-        campos_obrigatorios = ["Nome", "CPF", "Data de Nascimento", "Sexo", "E-mail", "Telefone"]
+        campos_obrigatorios = ["Nome", "CPF", "Data de Nascimento", "Sexo", "E-mail", "Telefone", "Estado"] # Estado é obrigatório
         for campo in campos_obrigatorios:
             if not dados_dict.get(campo) or dados_dict.get(campo).strip() == '':
                 messagebox.showerror("Erro de Validação", f"O campo '{campo}' é obrigatório e não pode estar vazio.")
@@ -255,6 +260,9 @@ def tela_clientes(janela):
         if dados_dict["Sexo"] not in sexos:
             messagebox.showerror("Erro", "Selecione um sexo válido.")
             return False
+        if dados_dict["Estado"] not in estados_brasileiros: # Valida o estado
+            messagebox.showerror("Erro", "Selecione um estado válido.")
+            return False
         if dados_dict["RG"] and len(dados_dict["RG"]) < 5:
             messagebox.showerror("Erro", "RG deve conter ao menos 5 caracteres, se preenchido.")
             return False
@@ -278,7 +286,7 @@ def tela_clientes(janela):
             else:
                 entrada.delete(0, tk.END)
         # Limpa o ID armazenado para evitar alterações acidentais
-        cliente_selecionado_id.set("") 
+        cliente_selecionado_id.set("")
         # Limpa qualquer seleção na Treeview
         for item in tabela.selection():
             tabela.selection_remove(item)
@@ -304,7 +312,7 @@ def tela_clientes(janela):
             # cliente_row é um objeto sqlite3.Row, que pode ser acessado por índice ou nome.
             # Convertemos para tupla para garantir a compatibilidade com values.
             # O ID (cliente_row[0]) é o primeiro elemento.
-            values_to_display = (cliente_row[0],) + tuple(cliente_row[1:]) 
+            values_to_display = (cliente_row[0],) + tuple(cliente_row[1:])
             tabela.insert("", "end", values=values_to_display)
 
     def preencher_campos_edicao(event):
@@ -314,9 +322,9 @@ def tela_clientes(janela):
             # Pega os valores visíveis da linha selecionada.
             # O primeiro valor (índice 0) é o ID do banco de dados.
             values_from_treeview = tabela.item(selected_item, 'values')
-            
+
             # Limpa os campos antes de preencher para evitar acumulação de texto
-            limpar_campos() 
+            limpar_campos()
 
             # Armazena o ID do cliente selecionado na variável Tkinter
             cliente_selecionado_id.set(values_from_treeview[0])
@@ -327,8 +335,8 @@ def tela_clientes(janela):
                 # O índice 'i' para 'campos' corresponde aos campos do formulário (Nome, CPF, etc.).
                 # Para acessar o valor correspondente de 'values_from_treeview', usamos 'i + 1'
                 # porque 'values_from_treeview[0]' é o ID.
-                if (i + 1) < len(values_from_treeview): 
-                    valor_do_campo = values_from_treeview[i + 1] 
+                if (i + 1) < len(values_from_treeview):
+                    valor_do_campo = values_from_treeview[i + 1]
                     if isinstance(entrada, DateEntry):
                         try:
                             # Garante que a data_obj seja um objeto date
@@ -336,11 +344,13 @@ def tela_clientes(janela):
                             entrada.set_date(data_obj)
                         except (ValueError, TypeError): # Lida com datas inválidas ou nulas
                             entrada.set_date(datetime.today()) # Fallback se a data for inválida
+                    elif isinstance(entrada, ttk.Combobox):
+                        entrada.set(str(valor_do_campo))
                     else:
                         entrada.insert(0, str(valor_do_campo)) # Insere o valor como string
         else:
             # Se nada estiver selecionado ou a seleção for removida
-            limpar_campos() 
+            limpar_campos()
 
 
     def alterar_cliente():
@@ -366,7 +376,7 @@ def tela_clientes(janela):
                 return False # Impede a alteração
             conn.close()
 
-        if not validar_dados(dados_atualizados): 
+        if not validar_dados(dados_atualizados):
             return # Sai se a validação falhar
 
         if messagebox.askyesno("Confirmar Alteração", "Tem certeza que deseja alterar este cliente?"):
@@ -387,7 +397,7 @@ def tela_clientes(janela):
         if not cliente_id_db: # Se a variável estiver vazia, significa que nenhum cliente foi selecionado
             messagebox.showwarning("Atenção", "Selecione um cliente na tabela para excluir.")
             return
-        
+
         # Pega o nome do cliente para a mensagem de confirmação diretamente da Treeview,
         # usando o item atualmente focado, já que o ID foi validado acima.
         selected_item_treeview = tabela.focus()
@@ -399,8 +409,8 @@ def tela_clientes(janela):
         if messagebox.askyesno("Confirmar Exclusão", f"Tem certeza que deseja excluir o cliente '{cliente_nome}' (ID: {cliente_id_db})? Esta ação é irreversível."):
             if excluir_cliente_db(cliente_id_db):
                 messagebox.showinfo("Sucesso", "Cliente excluído com sucesso.")
-                limpar_campos() 
-                carregar_clientes() 
+                limpar_campos()
+                carregar_clientes()
             # else: a mensagem de erro já é mostrada pela função de DB
         else:
             messagebox.showinfo("Cancelado", "Exclusão cancelada.")
@@ -422,7 +432,7 @@ def tela_clientes(janela):
 
     tk.Button(botoes_frame, text="🗑️ Excluir Cliente", bg="#cc0000", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=excluir_cliente).pack(side="left", padx=10)
-    
+
     # Novo botão para exportar JSON
     tk.Button(botoes_frame, text="📥 Exportar JSON", bg="#6A5ACD", fg="white",
               font=("Helvetica", 12, "bold"), width=20, command=exportar_clientes_json).pack(side="left", padx=10)
@@ -439,7 +449,7 @@ def tela_clientes(janela):
     entrada_busca.pack(side="left", padx=5)
 
     def buscar_cliente():
-        texto = entrada_busca.get().strip() 
+        texto = entrada_busca.get().strip()
         carregar_clientes(filtro=texto)
 
     tk.Button(busca_frame, text="Buscar", bg="#005580", fg="white",
@@ -458,7 +468,7 @@ def tela_clientes(janela):
     # Definir colunas da Treeview, incluindo 'ID' que será escondido
     colunas = ["ID", "Nome", "CPF", "Data de Nascimento", "Sexo", "RG", "Data de Cadastro",
                "Cidade", "Estado", "CEP", "Bairro", "Número", "Complemento",
-               "Data de Validade", "E-mail", "Telefone", "Endereço"] 
+               "Data de Validade", "E-mail", "Telefone", "Endereço"]
 
     tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings")
 
@@ -466,8 +476,8 @@ def tela_clientes(janela):
     for col in colunas:
         tabela.heading(col, text=col)
         # Ajuste a largura conforme necessário, Nome e Endereço podem ser maiores
-        tabela.column(col, width=120, anchor="center") 
-    
+        tabela.column(col, width=120, anchor="center")
+
     # Colunas com largura ajustada para melhor visualização (opcional)
     tabela.column("Nome", width=180)
     tabela.column("E-mail", width=180)

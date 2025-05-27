@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 def mostrar_home(janela):
+    style = ttk.Style(janela)
     style.theme_use('clam')
 
     # Limpa conteúdo anterior (exceto menu)

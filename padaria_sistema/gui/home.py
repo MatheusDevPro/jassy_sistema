@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 def mostrar_home(janela):
-    style = ttk.Style(janela)
     style.theme_use('clam')
 
     # Limpa conteúdo anterior (exceto menu)
@@ -11,7 +10,7 @@ def mostrar_home(janela):
             widget.destroy()
 
     janela.configure(bg="#f9f9f9")
-    janela.geometry("1280x980")
+    janela.geometry("1200x960")
 
     # --- Menu lateral ---
     menu_lateral = ttk.Frame(janela, width=180, relief="flat", style="Menu.TFrame")
@@ -146,9 +145,9 @@ def mostrar_home(janela):
     notif_frame.pack(fill="x", padx=30, pady=20)
 
     notificacoes = [
-        ("⚠️ Estoque de Farinha está abaixo do mínimo!", "#c0392b"),
-        ("✅ Backup automático realizado hoje às 02:00.", "#27ae60"),
-        ("📦 Novas requisições aguardando aprovação.", "#2980b9"),
+        ("⚠️ Validar Setor logistico alta demanda de trabalho!", "#c0392b"),
+        ("✅ Backup automático realizado hoje às 15:00.", "#27ae60"),
+        ("📦 Novas requisições estoque aguardando aprovação.", "#2980b9"),
     ]
 
     for msg, cor in notificacoes:
@@ -183,7 +182,7 @@ def mostrar_home(janela):
         resumo_card(resumo_frame, t, v, c).grid(row=0, column=i, padx=12)
 
     # Rodapé discreto
-    rodape = ttk.Label(janela, text="🛈 Sistema atualizado com as últimas melhorias - Versão 1.2",
+    rodape = ttk.Label(janela, text="🛈 Jassy Sistema Gestão - Versão 1.1",
                        font=("Segoe UI", 9), foreground="#999", background="#f9f9f9")
     rodape.pack(side="bottom", fill="x", pady=5)
 

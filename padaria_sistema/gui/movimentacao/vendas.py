@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 import os, csv
 from tkcalendar import DateEntry
 from datetime import datetime
+import sqlite3 # Import the sqlite3 module
 
 def tela_vendas(janela):
     for widget in janela.winfo_children():
@@ -78,7 +79,7 @@ def tela_vendas(janela):
             campos["Valor Total Líquido"].delete(0, tk.END)
             campos["Valor Total Líquido"].insert(0, f"{total:.2f}")
             campos["Valor Total Líquido"].config(state="readonly")
-        except:
+        except ValueError: # Catch specific error for invalid number conversion
             campos["Valor Total Líquido"].config(state="normal")
             campos["Valor Total Líquido"].delete(0, tk.END)
             campos["Valor Total Líquido"].insert(0, "0.00")
@@ -86,6 +87,38 @@ def tela_vendas(janela):
 
     for campo in ["Quantidade", "Preço Unitário", "Desconto (R$)", "Acréscimo (R$)"]:
         campos[campo].bind("<KeyRelease>", calcular_total)
+
+    # --- Database Functions ---
+    def connect_db():
+        os.makedirs("dados", exist_ok=True) # Ensure 'dados' directory exists
+        conn = sqlite3.connect("dados/vendas.db") # Connect to the database file
+        cursor = conn.cursor()
+        # Create table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS vendas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero_pedido TEXT,
+                data_venda TEXT,
+                cliente TEXT,
+                cpf_cnpj TEXT,
+                produto TEXT,
+                descricao TEXT,
+                categoria TEXT,
+                quantidade INTEGER,
+                preco_unitario REAL,
+                desconto REAL,
+                acrescimo REAL,
+                valor_total_liquido REAL,
+                vendedor TEXT,
+                forma_pagamento TEXT,
+                condicao_pagamento TEXT,
+                entrega TEXT,
+                status TEXT,
+                observacoes TEXT
+            )
+        ''')
+        conn.commit()
+        return conn, cursor
 
     def salvar():
         dados = []
@@ -98,47 +131,88 @@ def tela_vendas(janela):
         observacao = obs.get("1.0", tk.END).strip() or "-"
         dados.append(observacao)
 
+        # Validate mandatory fields
         obrigatorios = [k for k in campos if "Valor Total" not in k and "Desconto" not in k and "Acréscimo" not in k]
         for i, k in enumerate(campos):
-            if k in obrigatorios and not dados[i]:
+            # The 'dados' list order must match the 'campos' dictionary order
+            if k in obrigatorios and not dados[list(campos).index(k)]: # Check the corresponding data in 'dados'
                 messagebox.showwarning("Aviso", f"Preencha o campo: {k}")
                 return
 
-        if dados[list(campos).index("Quantidade")] == "0" or dados[list(campos).index("Valor Total Líquido")] == "0.00":
-            messagebox.showwarning("Erro", "Quantidade e Valor Total devem ser maiores que zero.")
+        try:
+            quantidade = int(dados[list(campos).index("Quantidade")])
+            valor_total_liquido = float(dados[list(campos).index("Valor Total Líquido")])
+            if quantidade <= 0 or valor_total_liquido <= 0:
+                messagebox.showwarning("Erro", "Quantidade e Valor Total devem ser maiores que zero.")
+                return
+        except ValueError:
+            messagebox.showwarning("Erro", "Quantidade e Preço Unitário devem ser números válidos.")
             return
 
-        os.makedirs("dados", exist_ok=True)
-        with open("dados/vendas.txt", "a", encoding="utf-8") as arq:
-            arq.write(" | ".join(dados) + "\n")
-        messagebox.showinfo("Salvo", "Venda registrada com sucesso.")
+        conn, cursor = connect_db()
+        try:
+            cursor.execute('''
+                INSERT INTO vendas (
+                    numero_pedido, data_venda, cliente, cpf_cnpj, produto, descricao,
+                    categoria, quantidade, preco_unitario, desconto, acrescimo,
+                    valor_total_liquido, vendedor, forma_pagamento, condicao_pagamento,
+                    entrega, status, observacoes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', tuple(dados))
+            conn.commit()
+            messagebox.showinfo("Salvo", "Venda registrada com sucesso no banco de dados.")
 
-        for campo in campos.values():
-            if isinstance(campo, tk.Entry):
-                campo.config(state="normal")
-                campo.delete(0, tk.END)
-            elif isinstance(campo, ttk.Combobox):
-                campo.set("")
-            elif isinstance(campo, DateEntry):
-                campo.set_date(datetime.today())
-        obs.delete("1.0", tk.END)
-        campos["Nº Pedido"].insert(0, datetime.now().strftime("%Y%m%d%H%M%S"))
-        campos["Nº Pedido"].config(state="readonly")
-        campos["Valor Total Líquido"].config(state="readonly")
+            # Clear fields after saving
+            for campo in campos.values():
+                if isinstance(campo, tk.Entry) and campo.cget("state") == "normal": # Only clear editable entries
+                    campo.delete(0, tk.END)
+                elif isinstance(campo, ttk.Combobox):
+                    campo.set("")
+                elif isinstance(campo, DateEntry):
+                    campo.set_date(datetime.today())
+            obs.delete("1.0", tk.END)
+            campos["Nº Pedido"].config(state="normal") # Temporarily enable to update
+            campos["Nº Pedido"].delete(0, tk.END)
+            campos["Nº Pedido"].insert(0, datetime.now().strftime("%Y%m%d%H%M%S"))
+            campos["Nº Pedido"].config(state="readonly")
+            campos["Valor Total Líquido"].config(state="readonly")
 
-        carregar_vendas()
+            carregar_vendas() # Reload data into Treeview
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao salvar: {e}")
+        finally:
+            conn.close()
 
     def exportar_csv():
+        conn, cursor = connect_db()
         try:
-            with open("dados/vendas.txt", "r", encoding="utf-8") as f:
-                linhas = [linha.strip().split(" | ") for linha in f if linha.strip()]
-            with open("dados/vendas.csv", "w", newline="", encoding="utf-8") as f_csv:
+            cursor.execute("SELECT * FROM vendas")
+            rows = cursor.fetchall()
+            if not rows:
+                messagebox.showwarning("Aviso", "Nenhum dado para exportar.")
+                return
+
+            csv_file_path = "dados/vendas.csv"
+            with open(csv_file_path, "w", newline="", encoding="utf-8") as f_csv:
                 writer = csv.writer(f_csv)
-                writer.writerow(list(campos.keys()) + ["Observações"])
-                writer.writerows(linhas)
-            messagebox.showinfo("Exportado", "Exportado para dados/vendas.csv")
-        except FileNotFoundError:
-            messagebox.showwarning("Erro", "Nenhum dado para exportar.")
+                # Write header row (excluding 'id' column from database)
+                header = [h[0] for h in cursor.description] # Get column names from cursor description
+                if 'id' in header:
+                    header.remove('id')
+                writer.writerow(header)
+
+                # Write data rows
+                for row in rows:
+                    # Exclude the 'id' column from the exported row if present
+                    row_list = list(row)
+                    if len(row_list) > len(header): # Assuming 'id' is the extra column
+                        row_list.pop(0) # Remove the first element (id)
+                    writer.writerow(row_list)
+            messagebox.showinfo("Exportado", f"Dados exportados para {csv_file_path}")
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao exportar: {e}")
+        finally:
+            conn.close()
 
     botoes = tk.Frame(frame, bg="#e6f2ff")
     botoes.pack(pady=10)
@@ -149,13 +223,22 @@ def tela_vendas(janela):
               font=("Helvetica", 12, "bold"), width=20).pack(side="left", padx=10)
 
     tabela_frame = tk.LabelFrame(frame, text="📋 Vendas Registradas", bg="#e6f2ff",
-                                 font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
+                                  font=("Helvetica", 12, "bold"), fg="#004d80", bd=2, relief="groove")
     tabela_frame.pack(pady=15, padx=20, fill="both", expand=True)
 
-    colunas = list(campos.keys()) + ["Observações"]
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=12)
-    for col in colunas:
-        tabela.heading(col, text=col)
+    # Use the database column names directly for Treeview columns (excluding 'id')
+    db_col_names = [
+        "numero_pedido", "data_venda", "cliente", "cpf_cnpj", "produto", "descricao",
+        "categoria", "quantidade", "preco_unitario", "desconto", "acrescimo",
+        "valor_total_liquido", "vendedor", "forma_pagamento", "condicao_pagamento",
+        "entrega", "status", "observacoes"
+    ]
+    # Map database column names to more readable labels for the Treeview headings
+    display_col_names = list(campos.keys()) + ["Observações"] # Use your original UI labels
+
+    tabela = ttk.Treeview(tabela_frame, columns=db_col_names, show="headings", height=12) # Use db_col_names as internal identifiers
+    for i, col in enumerate(db_col_names):
+        tabela.heading(col, text=display_col_names[i]) # Display user-friendly headings
         tabela.column(col, width=120, anchor="center")
 
     scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
@@ -171,13 +254,16 @@ def tela_vendas(janela):
 
     def carregar_vendas():
         tabela.delete(*tabela.get_children())
+        conn, cursor = connect_db()
         try:
-            with open("dados/vendas.txt", "r", encoding="utf-8") as f:
-                for linha in f:
-                    valores = [v.strip() for v in linha.strip().split(" | ")]
-                    if len(valores) == len(colunas):
-                        tabela.insert("", "end", values=valores)
-        except FileNotFoundError:
-            pass
+            cursor.execute("SELECT * FROM vendas")
+            rows = cursor.fetchall()
+            for row in rows:
+                # Exclude the 'id' column when inserting into the Treeview
+                tabela.insert("", "end", values=row[1:]) # Skip the first element (id)
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao carregar dados: {e}")
+        finally:
+            conn.close()
 
     carregar_vendas()

@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 import os, csv
+import sqlite3 # Import the sqlite3 module
+from datetime import datetime
 
 def tela_compras(janela):
     for widget in janela.winfo_children():
@@ -63,55 +65,233 @@ def tela_compras(janela):
     }
 
     # Definir valores padrão
-    campos["Categoria"].current(0)
-    campos["Unidade de Medida"].current(0)
-    campos["Forma de Pagamento"].current(0)
-    campos["Condição de Pagamento"].current(0)
-    campos["Status da Compra"].current(0)
-    campos["Tipo de Frete"].current(0)
+    campos["Categoria"].set(categorias[0])
+    campos["Unidade de Medida"].set(unidades[0])
+    campos["Forma de Pagamento"].set(formas_pagamento[0])
+    campos["Condição de Pagamento"].set(condicoes_pagamento[0])
+    campos["Status da Compra"].set(status_compra[0])
+    campos["Tipo de Frete"].set(tipo_frete[0])
 
     # Distribuir os campos (em colunas)
-    i = 0
+    # The 'i' counter needs to be managed carefully for row/column distribution
+    # and to ensure "Observações" gets its dedicated row.
+    current_row, current_col = 0, 0
     for rotulo, entrada in campos.items():
         if rotulo == "Observações":
-            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0").grid(row=i, column=0, sticky="nw", padx=5, pady=5)
-            entrada.grid(row=i, column=1, columnspan=3, sticky="w", padx=5, pady=5)
+            # Observações takes a full row at the end
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0").grid(row=current_row, column=0, sticky="nw", padx=5, pady=5)
+            entrada.grid(row=current_row, column=1, columnspan=3, sticky="w", padx=5, pady=5)
         else:
-            linha, coluna = divmod(i, 2)
-            linha *= 1
-            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0").grid(row=linha, column=coluna*2, sticky="e", padx=5, pady=5)
-            entrada.grid(row=linha, column=coluna*2 + 1, sticky="w", padx=5, pady=5)
-            i += 1
+            tk.Label(campos_frame, text=rotulo + ":", font=("Helvetica", 12), bg="#fffaf0").grid(row=current_row, column=current_col*2, sticky="e", padx=5, pady=5)
+            entrada.grid(row=current_row, column=current_col*2 + 1, sticky="w", padx=5, pady=5)
+            current_col += 1
+            if current_col > 1: # Move to next row after 2 columns
+                current_col = 0
+                current_row += 1
+    # Ensure 'Observações' is placed correctly after all other fields
+    # If "Observações" is the last item, current_row would already be incremented correctly by the loop.
+    # Otherwise, you might need an extra increment if it was placed manually outside the loop.
+    # Given the loop structure, it should naturally place it after all other grid items.
+
+    # --- Database Functions ---
+    def connect_db():
+        os.makedirs("dados", exist_ok=True) # Ensure 'dados' directory exists
+        conn = sqlite3.connect("dados/compras.db") # Connect to the database file
+        cursor = conn.cursor()
+        # Create table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS compras (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fornecedor TEXT,
+                cnpj_fornecedor TEXT,
+                nome_fantasia TEXT,
+                email_fornecedor TEXT,
+                telefone_fornecedor TEXT,
+                codigo_produto TEXT,
+                nome_produto TEXT,
+                categoria TEXT,
+                unidade_medida TEXT,
+                quantidade REAL,
+                valor_unitario REAL,
+                valor_total REAL,
+                numero_nota_fiscal TEXT,
+                serie_nf TEXT,
+                chave_acesso TEXT,
+                forma_pagamento TEXT,
+                condicao_pagamento TEXT,
+                status_compra TEXT,
+                data_compra TEXT,
+                data_recebimento TEXT,
+                data_vencimento TEXT,
+                transportadora TEXT,
+                tipo_frete TEXT,
+                valor_frete REAL,
+                observacoes TEXT
+            )
+        ''')
+        conn.commit()
+        return conn, cursor
 
     def salvar_compra():
         dados = []
         for rotulo, entrada in campos.items():
-            if rotulo == "Observações":
-                dados.append(entrada.get("1.0", "end").strip())
+            if isinstance(entrada, DateEntry):
+                dados.append(entrada.get_date().strftime("%d/%m/%Y"))
+            elif isinstance(entrada, ttk.Combobox):
+                dados.append(entrada.get().strip())
+            elif rotulo == "Observações":
+                dados.append(entrada.get("1.0", tk.END).strip())
             else:
                 dados.append(entrada.get().strip())
-        if all(dados):
-            os.makedirs("dados", exist_ok=True)
-            with open("dados/compras.txt", "a", encoding="utf-8") as f:
-                f.write(" | ".join(dados) + "\n")
-            messagebox.showinfo("Sucesso", "Compra registrada com sucesso.")
+
+        # Basic validation for empty fields
+        for i, val in enumerate(dados):
+            if not val and list(campos.keys())[i] != "Observações": # Allow Observations to be empty
+                messagebox.showwarning("Atenção", f"Preencha o campo: {list(campos.keys())[i]}")
+                return
+
+        # Specific validation for numeric fields
+        try:
+            quantidade = float(campos["Quantidade"].get())
+            valor_unitario = float(campos["Valor Unitário"].get())
+            valor_total_calc = quantidade * valor_unitario
+            # Update 'Valor Total' field
+            campos["Valor Total"].config(state="normal")
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].insert(0, f"{valor_total_calc:.2f}")
+            campos["Valor Total"].config(state="readonly")
+            
+            valor_total_display = float(campos["Valor Total"].get()) # Get the value from the updated field
+
+            if quantidade <= 0 or valor_unitario <= 0:
+                messagebox.showwarning("Erro de Entrada", "Quantidade e Valor Unitário devem ser maiores que zero.")
+                return
+        except ValueError:
+            messagebox.showwarning("Erro de Entrada", "Quantidade, Valor Unitário e Valor do Frete devem ser números válidos.")
+            return
+
+        conn, cursor = connect_db()
+        try:
+            # Prepare data tuple in the exact order of DB columns
+            data_to_insert = (
+                campos["Fornecedor"].get().strip(),
+                campos["CNPJ do Fornecedor"].get().strip(),
+                campos["Nome Fantasia"].get().strip(),
+                campos["E-mail do Fornecedor"].get().strip(),
+                campos["Telefone do Fornecedor"].get().strip(),
+                campos["Código do Produto"].get().strip(),
+                campos["Nome do Produto"].get().strip(),
+                campos["Categoria"].get().strip(),
+                campos["Unidade de Medida"].get().strip(),
+                float(campos["Quantidade"].get()),
+                float(campos["Valor Unitário"].get()),
+                float(campos["Valor Total"].get()), # Use the calculated value
+                campos["Número da Nota Fiscal"].get().strip(),
+                campos["Série da NF"].get().strip(),
+                campos["Chave de Acesso"].get().strip(),
+                campos["Forma de Pagamento"].get().strip(),
+                campos["Condição de Pagamento"].get().strip(),
+                campos["Status da Compra"].get().strip(),
+                campos["Data da Compra"].get_date().strftime("%d/%m/%Y"),
+                campos["Data de Recebimento"].get_date().strftime("%d/%m/%Y"),
+                campos["Data de Vencimento"].get_date().strftime("%d/%m/%Y"),
+                campos["Transportadora"].get().strip(),
+                campos["Tipo de Frete"].get().strip(),
+                float(campos["Valor do Frete"].get() or 0.0), # Handle empty frete value
+                campos["Observações"].get("1.0", tk.END).strip() or "-"
+            )
+
+            cursor.execute('''
+                INSERT INTO compras (
+                    fornecedor, cnpj_fornecedor, nome_fantasia, email_fornecedor, telefone_fornecedor,
+                    codigo_produto, nome_produto, categoria, unidade_medida, quantidade, valor_unitario,
+                    valor_total, numero_nota_fiscal, serie_nf, chave_acesso, forma_pagamento,
+                    condicao_pagamento, status_compra, data_compra, data_recebimento, data_vencimento,
+                    transportadora, tipo_frete, valor_frete, observacoes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', data_to_insert)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Compra registrada com sucesso no banco de dados.")
+
+            # Clear fields after saving
             for rotulo, entrada in campos.items():
-                entrada.delete(0, tk.END) if rotulo != "Observações" else entrada.delete("1.0", "end")
-            carregar_compras()
-        else:
-            messagebox.showwarning("Atenção", "Preencha todos os campos.")
+                if isinstance(entrada, tk.Entry):
+                    entrada.delete(0, tk.END)
+                elif isinstance(entrada, ttk.Combobox):
+                    entrada.set("") # Clear combobox selection
+                elif isinstance(entrada, DateEntry):
+                    entrada.set_date(datetime.today()) # Reset to current date
+                elif rotulo == "Observações":
+                    entrada.delete("1.0", tk.END)
+            
+            # Reset default combobox values if desired
+            campos["Categoria"].set(categorias[0])
+            campos["Unidade de Medida"].set(unidades[0])
+            campos["Forma de Pagamento"].set(formas_pagamento[0])
+            campos["Condição de Pagamento"].set(condicoes_pagamento[0])
+            campos["Status da Compra"].set(status_compra[0])
+            campos["Tipo de Frete"].set(tipo_frete[0])
+
+            campos["Valor Total"].config(state="normal") # Enable to clear if needed
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].config(state="readonly") # Back to readonly
+
+            carregar_compras() # Reload data into Treeview
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao salvar: {e}")
+        finally:
+            conn.close()
+
+    def calcular_valor_total(event=None):
+        try:
+            qnt = float(campos["Quantidade"].get())
+            preco_unit = float(campos["Valor Unitário"].get())
+            total = qnt * preco_unit
+            campos["Valor Total"].config(state="normal")
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].insert(0, f"{total:.2f}")
+            campos["Valor Total"].config(state="readonly")
+        except ValueError:
+            campos["Valor Total"].config(state="normal")
+            campos["Valor Total"].delete(0, tk.END)
+            campos["Valor Total"].insert(0, "0.00")
+            campos["Valor Total"].config(state="readonly")
+
+    # Bind calculation to relevant fields
+    campos["Quantidade"].bind("<KeyRelease>", calcular_valor_total)
+    campos["Valor Unitário"].bind("<KeyRelease>", calcular_valor_total)
+
 
     def exportar_csv():
+        conn, cursor = connect_db()
         try:
-            with open("dados/compras.txt", "r", encoding="utf-8") as f:
-                linhas = [linha.strip().split("|") for linha in f if linha.strip()]
-            with open("dados/compras.csv", "w", newline="", encoding="utf-8") as f_csv:
+            cursor.execute("SELECT * FROM compras")
+            rows = cursor.fetchall()
+            if not rows:
+                messagebox.showwarning("Aviso", "Nenhum dado para exportar.")
+                return
+
+            csv_file_path = "dados/compras.csv"
+            with open(csv_file_path, "w", newline="", encoding="utf-8") as f_csv:
                 writer = csv.writer(f_csv)
-                writer.writerow(campos.keys())
-                writer.writerows(linhas)
-            messagebox.showinfo("Exportado", "Dados exportados para 'dados/compras.csv'.")
-        except FileNotFoundError:
-            messagebox.showwarning("Erro", "Nenhum dado encontrado para exportar.")
+                # Get column names from cursor description (excluding 'id')
+                header = [description[0] for description in cursor.description]
+                if 'id' in header:
+                    header.remove('id')
+                writer.writerow(header)
+
+                # Write data rows, excluding the 'id' column
+                for row in rows:
+                    row_list = list(row)
+                    if len(row_list) > len(header): # Assuming 'id' is the extra column at index 0
+                        row_list.pop(0)
+                    writer.writerows([row_list]) # writerows expects an iterable of rows, so pass [row_list]
+
+            messagebox.showinfo("Exportado", f"Dados exportados para {csv_file_path}")
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao exportar: {e}")
+        finally:
+            conn.close()
 
     # Botões
     botoes_frame = tk.Frame(frame, bg="#fffaf0")
@@ -124,10 +304,19 @@ def tela_compras(janela):
     tabela_frame = tk.Frame(frame)
     tabela_frame.pack(pady=10, fill="both", expand=True)
 
-    colunas = tuple(campos.keys())
-    tabela = ttk.Treeview(tabela_frame, columns=colunas, show="headings", height=10)
-    for col in colunas:
-        tabela.heading(col, text=col)
+    # Use database column names for Treeview internal columns, and map to display names
+    db_col_names = [
+        "fornecedor", "cnpj_fornecedor", "nome_fantasia", "email_fornecedor", "telefone_fornecedor",
+        "codigo_produto", "nome_produto", "categoria", "unidade_medida", "quantidade", "valor_unitario",
+        "valor_total", "numero_nota_fiscal", "serie_nf", "chave_acesso", "forma_pagamento",
+        "condicao_pagamento", "status_compra", "data_compra", "data_recebimento", "data_vencimento",
+        "transportadora", "tipo_frete", "valor_frete", "observacoes"
+    ]
+    display_col_names = list(campos.keys()) # Use your original UI labels as display names
+
+    tabela = ttk.Treeview(tabela_frame, columns=db_col_names, show="headings", height=10)
+    for i, col in enumerate(db_col_names):
+        tabela.heading(col, text=display_col_names[i]) # Set user-friendly heading
         tabela.column(col, width=140, anchor="center")
 
     scroll_y = ttk.Scrollbar(tabela_frame, orient="vertical", command=tabela.yview)
@@ -142,13 +331,16 @@ def tela_compras(janela):
 
     def carregar_compras():
         tabela.delete(*tabela.get_children())
+        conn, cursor = connect_db()
         try:
-            with open("dados/compras.txt", "r", encoding="utf-8") as f:
-                for linha in f:
-                    valores = [v.strip() for v in linha.strip().split("|")]
-                    if len(valores) == len(colunas):
-                        tabela.insert("", "end", values=valores)
-        except FileNotFoundError:
-            pass
+            cursor.execute("SELECT * FROM compras")
+            rows = cursor.fetchall()
+            for row in rows:
+                # Insert data into Treeview, skipping the 'id' column
+                tabela.insert("", "end", values=row[1:]) # Skip the first element (id)
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro no Banco de Dados", f"Ocorreu um erro ao carregar dados: {e}")
+        finally:
+            conn.close()
 
     carregar_compras()

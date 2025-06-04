@@ -226,7 +226,9 @@ def tela_produtos(janela):
                 return False
 
         try:
-            preco = float(dados_dict["Preço"].replace(',', '.')) # Permite vírgula como decimal
+            # Convert to string before replacing, then to float
+            preco_str = str(dados_dict["Preço"])
+            preco = float(preco_str.replace(',', '.')) 
             if preco < 0:
                 messagebox.showerror("Erro", "Preço não pode ser negativo.")
                 return False
@@ -262,7 +264,9 @@ def tela_produtos(janela):
 
         if dados_dict["Peso (kg)"]:
             try:
-                peso = float(dados_dict["Peso (kg)"].replace(',', '.')) # Permite vírgula como decimal
+                # Convert to string before replacing, then to float
+                peso_str = str(dados_dict["Peso (kg)"])
+                peso = float(peso_str.replace(',', '.')) 
                 if peso < 0:
                     messagebox.showerror("Erro", "Peso (kg) não pode ser negativo.")
                     return False
@@ -311,6 +315,24 @@ def tela_produtos(janela):
 
         if not validar_dados_produto(dados):
             return
+
+        # Perform the conversion for database insertion after validation
+        # This prevents the float conversion from happening twice on the same value
+        try:
+            dados["Preço"] = float(str(dados["Preço"]).replace(',', '.'))
+            if dados["Peso (kg)"]:
+                dados["Peso (kg)"] = float(str(dados["Peso (kg)"]).replace(',', '.'))
+            else:
+                dados["Peso (kg)"] = None # Handle empty string for optional float field
+            if dados["Garantia (meses)"]:
+                dados["Garantia (meses)"] = int(dados["Garantia (meses)"])
+            else:
+                dados["Garantia (meses)"] = None # Handle empty string for optional int field
+
+        except ValueError as e:
+            messagebox.showerror("Erro de Conversão", f"Erro ao converter dados numéricos: {e}")
+            return
+
 
         if inserir_produto_db(dados):
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso.")
@@ -383,6 +405,23 @@ def tela_produtos(janela):
 
         if not validar_dados_produto(dados_atualizados):
             return
+
+        # Perform the conversion for database update after validation
+        try:
+            dados_atualizados["Preço"] = float(str(dados_atualizados["Preço"]).replace(',', '.'))
+            if dados_atualizados["Peso (kg)"]:
+                dados_atualizados["Peso (kg)"] = float(str(dados_atualizados["Peso (kg)"]).replace(',', '.'))
+            else:
+                dados_atualizados["Peso (kg)"] = None
+            if dados_atualizados["Garantia (meses)"]:
+                dados_atualizados["Garantia (meses)"] = int(dados_atualizados["Garantia (meses)"])
+            else:
+                dados_atualizados["Garantia (meses)"] = None
+
+        except ValueError as e:
+            messagebox.showerror("Erro de Conversão", f"Erro ao converter dados numéricos para atualização: {e}")
+            return
+
 
         if messagebox.askyesno("Confirmar Alteração", "Tem certeza que deseja alterar este produto?"):
             if atualizar_produto_db(produto_id_db, dados_atualizados):

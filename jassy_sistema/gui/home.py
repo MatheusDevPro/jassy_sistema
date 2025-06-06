@@ -128,7 +128,7 @@ def mostrar_home(janela):
 
     # Barras indicadores com cores neutras e vibrantes
     barra_cores = ["#5dade2", "#58d68d", "#f5b041", "#af7ac5", "#ec7063"]
-    alturas = [100, 140, 90, 120, 110]
+    alturas = [180, 140, 90, 120, 189]
     rotulos = ["Vendas", "Estoque", "Compras", "Pedidos", "Clientes"]
 
     for i, (altura, cor, rotulo) in enumerate(zip(alturas, barra_cores, rotulos)):

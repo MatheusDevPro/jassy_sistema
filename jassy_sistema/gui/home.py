@@ -174,7 +174,7 @@ def mostrar_home(janela):
 
     resumo_itens = [
         ("🧾 Produtos", "128", "#3498db"),
-        ("📊 Vendas Hoje", "R$ 1.430,00", "#2ecc71"),
+        ("📊 Saida de produto", "R$ 25.540,00", "#2ecc71"),
         ("🕒 Pendentes", "5 Pedidos", "#f39c12"),
         ("👥 Clientes", "74 ativos", "#9b59b6"),
     ]

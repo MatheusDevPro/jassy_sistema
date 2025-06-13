@@ -139,7 +139,7 @@ def mostrar_home(janela):
         canvas.create_rectangle(x0, y0, x1, y1, fill=cor, width=0, outline="#444")
         canvas.create_text(x0 + 22, y1 + 20, text=rotulo, font=("Segoe UI", 10), fill="#444")
 
-    canvas.create_text(350, 210, text="Gráfico ilustrativo de desempenho", font=("Segoe UI", 9), fill="#777")
+    canvas.create_text(350, 210, text="", font=("Segoe UI", 9), fill="#777")
 
     # Notificações estilo card
     notif_frame = ttk.LabelFrame(centralizador, text="Notificações do Sistema", padding=10)

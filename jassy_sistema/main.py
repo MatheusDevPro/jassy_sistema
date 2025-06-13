@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-
+import sqlite3
+import hashlib
 
 # Importações do seu sistema (exemplo: algumas já definidas)
 from gui.home import mostrar_home
@@ -48,7 +49,7 @@ from gui.CRM.relatorios_crm import tela_relatorios_crm
 from gui.producao.chamados_producao import tela_chamados_producao
 from gui.producao.ordem_producao import tela_ordem_producao
 from gui.producao.controle_qualidade import tela_controle_qualidade
-from gui.Marketing.campanhas_marketing  import tela_campanhas_marketing
+from gui.Marketing.campanhas_marketing import tela_campanhas_marketing
 from gui.Marketing.analise_mercado import tela_analise_mercado
 from gui.Marketing.relatorios_marketing import tela_relatorios_marketing
 from gui.suporte.helpdesk import tela_helpdesk
@@ -56,13 +57,17 @@ from gui.suporte.contatos_suporte import contatos_suporte
 from gui.adm.cadastro_usuario import tela_cadastro_usuario
 from gui.estoque.wms import tela_wms
 
+# Importa as funções do seu novo arquivo database.py
+from database import criar_tabela_usuarios, adicionar_usuario, verificar_credenciais
+
+
 def placeholder():
     messagebox.showinfo("Em Desenvolvimento", "Esta funcionalidade ainda não foi implementada.")
 
 def limpar_janela(janela):
     for widget in janela.winfo_children():
         if widget.winfo_class() != 'Menu':
-          widget.destroy()
+            widget.destroy()
 
 def mostrar_tela(janela, func_tela, titulo="Sistema de Gestão"):
     limpar_janela(janela)
@@ -143,7 +148,7 @@ def main_app():
 
     # Novo Menu CRM / Projetos
     menu_crm = tk.Menu(menu_bar, tearoff=0)
-    menu_crm.add_command(label="📇 Gestão de Oportunidades", command=lambda:tela_gestao_oportunidades(janela))  # tela_gestao_oportunidades
+    menu_crm.add_command(label="📇 Gestão de Oportunidades", command=lambda:tela_gestao_oportunidades(janela))
     menu_crm.add_command(label="📞 Contatos e Histórico", command=lambda: tela_contatos_historico(janela))
     menu_crm.add_command(label="📅 Agenda e Compromissos", command=lambda: tela_agenda_compromissos(janela))
     menu_crm.add_command(label="📊 Relatórios CRM", command=lambda: tela_relatorios_crm(janela))
@@ -151,21 +156,21 @@ def main_app():
 
     # Novo Menu Produção (caso tenha)
     menu_producao = tk.Menu(menu_bar, tearoff=0)
-    menu_producao.add_command(label="🛠️ Chamados Produção", command=lambda: tela_chamados_producao(janela))  # tela_chamados_producao
-    menu_producao.add_command(label="⚙️ Ordens de Produção", command=lambda: tela_ordem_producao(janela))  # tela_ordem_producao
+    menu_producao.add_command(label="🛠️ Chamados Produção", command=lambda: tela_chamados_producao(janela))
+    menu_producao.add_command(label="⚙️ Ordens de Produção", command=lambda: tela_ordem_producao(janela))
     menu_producao.add_command(label="📋 Controle de Qualidade", command=lambda: tela_controle_qualidade(janela))
     menu_bar.add_cascade(label="🏭 Produção", menu=menu_producao)
 
     # Novo Menu Marketing
     menu_marketing = tk.Menu(menu_bar, tearoff=0)
-    menu_marketing.add_command(label="📢 Campanhas", command=lambda: tela_campanhas_marketing(janela))  # tela_campanhas_marketing
+    menu_marketing.add_command(label="📢 Campanhas", command=lambda: tela_campanhas_marketing(janela))
     menu_marketing.add_command(label="📊 Análise de Mercado", command=lambda: tela_analise_mercado(janela))
     menu_marketing.add_command(label="📈 Relatórios Marketing", command=lambda: tela_relatorios_marketing(janela))
     menu_bar.add_cascade(label="📣 Marketing", menu=menu_marketing)
 
     # Novo Menu Suporte / Helpdesk
     menu_suporte = tk.Menu(menu_bar, tearoff=0)
-    menu_suporte.add_command(label="🎫 Helpdesk", command=lambda: tela_helpdesk(janela))  # tela_helpdesk
+    menu_suporte.add_command(label="🎫 Helpdesk", command=lambda: tela_helpdesk(janela))
     menu_suporte.add_command(label="📞 Contatos Suporte", command=lambda: contatos_suporte(janela))
     menu_bar.add_cascade(label="🛠️ Suporte", menu=menu_suporte)
 
@@ -189,19 +194,75 @@ def main_app():
 
     janela.mainloop()
 
+# Função para a tela de cadastro de usuários
+def tela_cadastro_usuario_login(parent_window):
+    cadastro_win = tk.Toplevel(parent_window)
+    cadastro_win.title("🐾 Cadastro de Usuário")
+    cadastro_win.geometry("300x250")
+    cadastro_win.configure(bg="#f8f8ff")
 
-# Tela de login (mantive seu código original, com leve melhoria)
+    # Centralizar janela de cadastro
+    parent_window.update_idletasks() # Garante que a janela principal tenha suas dimensões atualizadas
+    x = parent_window.winfo_x() + (parent_window.winfo_width() // 2) - (300 // 2)
+    y = parent_window.winfo_y() + (parent_window.winfo_height() // 2) - (250 // 2)
+    cadastro_win.geometry(f"+{x}+{y}")
+
+    label_titulo = tk.Label(cadastro_win, text="Novo Usuário", font=("Arial", 14, "bold"), fg="#1E90FF", bg="#f8f8ff")
+    label_titulo.pack(pady=10)
+
+    label_usuario = tk.Label(cadastro_win, text="Usuário:", font=("Arial", 10), bg="#f8f8ff")
+    label_usuario.pack()
+    entry_usuario = tk.Entry(cadastro_win, font=("Arial", 10))
+    entry_usuario.pack()
+
+    label_senha = tk.Label(cadastro_win, text="Senha:", font=("Arial", 10), bg="#f8f8ff")
+    label_senha.pack()
+    entry_senha = tk.Entry(cadastro_win, font=("Arial", 10), show="*")
+    entry_senha.pack()
+
+    label_confirmar_senha = tk.Label(cadastro_win, text="Confirmar Senha:", font=("Arial", 10), bg="#f8f8ff")
+    label_confirmar_senha.pack()
+    entry_confirmar_senha = tk.Entry(cadastro_win, font=("Arial", 10), show="*")
+    entry_confirmar_senha.pack()
+
+    label_erro = tk.Label(cadastro_win, text="", fg="red", bg="#f8f8ff")
+    label_erro.pack(pady=5)
+
+    def realizar_cadastro():
+        usuario = entry_usuario.get()
+        senha = entry_senha.get()
+        confirmar_senha = entry_confirmar_senha.get()
+
+        if not usuario or not senha or not confirmar_senha:
+            label_erro.config(text="Todos os campos são obrigatórios!")
+            return
+
+        if senha != confirmar_senha:
+            label_erro.config(text="As senhas não coincidem!")
+            return
+
+        if adicionar_usuario(usuario, senha):
+            messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!", parent=cadastro_win)
+            cadastro_win.destroy()
+        else:
+            label_erro.config(text="Nome de usuário já existe.")
+
+    botao_cadastrar = tk.Button(cadastro_win, text="Cadastrar", font=("Arial", 10, "bold"), bg="#28a745", fg="white", command=realizar_cadastro)
+    botao_cadastrar.pack(pady=10)
+
+
+# Tela de login
 def tela_login():
     login_win = tk.Tk()
     login_win.title("🐾 Login - Jassy Gestão")
-    login_win.geometry("300x230")
+    login_win.geometry("300x260") # Ajustado para acomodar o novo botão
     login_win.configure(bg="#f8f8ff")
 
     # Centralizar janela
     screen_width = login_win.winfo_screenwidth()
     screen_height = login_win.winfo_screenheight()
     x = (screen_width // 2) - (300 // 2)
-    y = (screen_height // 2) - (230 // 2)
+    y = (screen_height // 2) - (260 // 2)
     login_win.geometry(f"+{x}+{y}")
 
     label_titulo = tk.Label(login_win, text="🐾 Login Jassy", font=("Arial", 14, "bold"), fg="#1E90FF", bg="#f8f8ff")
@@ -223,16 +284,18 @@ def tela_login():
     def validar_login():
         usuario = entry_usuario.get()
         senha = entry_senha.get()
-        # Simples validação fixa
-        if usuario == "matheus" and senha == "123456":
+
+        if verificar_credenciais(usuario, senha):
             login_win.destroy()
             main_app()
         else:
             label_erro.config(text="Usuário ou senha inválidos")
-            # messagebox.showerror("Erro", "Usuário ou senha inválidos")
 
     botao_login = tk.Button(login_win, text="Login", font=("Arial", 10, "bold"), bg="#1E90FF", fg="white", command=validar_login)
-    botao_login.pack(pady=10)
+    botao_login.pack(pady=5)
+
+    botao_cadastrar_novo = tk.Button(login_win, text="Cadastrar Novo Usuário", font=("Arial", 9), bg="#6c757d", fg="white", command=lambda: tela_cadastro_usuario_login(login_win))
+    botao_cadastrar_novo.pack(pady=5)
 
     login_win.mainloop()
 

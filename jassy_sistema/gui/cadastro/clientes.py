@@ -204,22 +204,22 @@ def tela_clientes(janela):
     # Dicionário para armazenar as referências aos campos de entrada
     # e um campo oculto para armazenar o ID do cliente selecionado para alteração
     campos = {
-        "Nome": tk.Entry(campos_frame, width=30),
-        "CPF": tk.Entry(campos_frame, width=30),
-        "Data de Nascimento": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
+        "Nome": tk.Entry(campos_frame, width=28),
+        "CPF": tk.Entry(campos_frame, width=28),
+        "Data de Nascimento": DateEntry(campos_frame, width=28, date_pattern='dd/mm/yyyy'),
         "Sexo": ttk.Combobox(campos_frame, values=sexos, width=28, state="readonly"),
-        "RG": tk.Entry(campos_frame, width=30),
-        "Data de Cadastro": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
-        "Cidade": tk.Entry(campos_frame, width=30),
+        "RG": tk.Entry(campos_frame, width=28),
+        "Data de Cadastro": DateEntry(campos_frame, width=28, date_pattern='dd/mm/yyyy'),
+        "Cidade": tk.Entry(campos_frame, width=28),
         "Estado": ttk.Combobox(campos_frame, values=estados_brasileiros, width=28, state="readonly"), # Mantido como Combobox
-        "CEP": tk.Entry(campos_frame, width=30),
-        "Bairro": tk.Entry(campos_frame, width=30),
-        "Número": tk.Entry(campos_frame, width=30),
-        "Complemento": tk.Entry(campos_frame, width=30),
-        "Data de Validade": DateEntry(campos_frame, width=27, date_pattern='dd/mm/yyyy'),
-        "E-mail": tk.Entry(campos_frame, width=30),
-        "Telefone": tk.Entry(campos_frame, width=30),
-        "Endereço": tk.Entry(campos_frame, width=30)
+        "CEP": tk.Entry(campos_frame, width=28),
+        "Bairro": tk.Entry(campos_frame, width=28),
+        "Número": tk.Entry(campos_frame, width=28),
+        "Complemento": tk.Entry(campos_frame, width=28),
+        "Data de Validade": DateEntry(campos_frame, width=28, date_pattern='dd/mm/yyyy'),
+        "E-mail": tk.Entry(campos_frame, width=28),
+        "Telefone": tk.Entry(campos_frame, width=28),
+        "Endereço": tk.Entry(campos_frame, width=28)
     }
 
     # Adiciona uma variável Tkinter para armazenar o ID do cliente selecionado.

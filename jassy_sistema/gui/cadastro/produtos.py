@@ -188,23 +188,23 @@ def tela_produtos(janela):
     categorias = ["Alimentos", "Bebidas", "Higiene", "Limpeza", "Eletrônicos", "Roupas", "Outros", "Ferramentas", "Móveis", "Brinquedos", "Saúde", "Beleza", "Esportes", "Automotivo", "Jardinagem", "Pet Shop", "Livros", "Papeleria", "Informática", "Construção Civil", "Construção e Reforma", "Saúde e Bem-Estar", "Moda e Acessórios", "Casa e Decoração"]
     unidades = ["UN", "LT", "KG", "MT", "CX", "PCT", "BAG", "GAL", "ML", "G", "CM", "MM"]
     localização_no_Estoque = ["Prateleira 1", "Prateleira 2", "Prateleira 3", "Prateleira 4", "Prateleira 5", "Prateleira 6", "Prateleira 7",]
-
+    Marca = ["Samsung", "LG", "Sony", "Apple", "Microsoft", "Dell", "HP", "Lenovo", "Asus", "Acer", "Motorola", "Nokia", "Xiaomi", "Huawei", "Philips", "Bosch", "Electrolux", "Brastemp", "Consul", "Whirlpool", "Tramontina", "Cuisinart", "KitchenAid", "Black+Decker", "Arno", "Mondial", "Britânia", "Panasonic", "Toshiba", "Canon", "Nikon", "Fujifilm", "Olympus", "GoPro", "DJI"]
     # Mapeamento dos campos para as entradas Tkinter
     campos = {
-        "Nome": tk.Entry(campos_frame, width=30),
-        "Código": tk.Entry(campos_frame, width=30),
-        "Preço": tk.Entry(campos_frame, width=30),
-        "Quantidade": tk.Entry(campos_frame, width=30),
-        "Data de Validade": DateEntry(campos_frame, width=27, background='darkblue',
+        "Nome": tk.Entry(campos_frame, width=33),
+        "Código": tk.Entry(campos_frame, width=33),
+        "Preço": tk.Entry(campos_frame, width=33),
+        "Quantidade": tk.Entry(campos_frame, width=33),
+        "Data de Validade": DateEntry(campos_frame, width=30, background='darkblue',
                                       foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy'),
-        "Fornecedor": tk.Entry(campos_frame, width=30),
-        "Descrição": tk.Entry(campos_frame, width=30),
-        "Categoria": ttk.Combobox(campos_frame, values=categorias, width=28, state="readonly"),
-        "Unidade de Medida": ttk.Combobox(campos_frame, values=unidades, width=28, state="readonly"),
-        "Localização no Estoque": ttk.Combobox(campos_frame, value=localização_no_Estoque, width=28, state="readonly"),
-        "Marca": tk.Entry(campos_frame, width=30),
-        "Garantia (meses)": tk.Entry(campos_frame, width=30),
-        "Peso (kg)": tk.Entry(campos_frame, width=30),
+        "Fornecedor": tk.Entry(campos_frame, width=33),
+        "Descrição": tk.Entry(campos_frame, width=33),
+        "Categoria": ttk.Combobox(campos_frame, values=categorias, width=30, state="readonly"),
+        "Unidade de Medida": ttk.Combobox(campos_frame, values=unidades, width=30, state="readonly"),
+        "Localização no Estoque": ttk.Combobox(campos_frame, value=localização_no_Estoque, width=30, state="readonly"),
+        "Marca": ttk.Combobox(campos_frame, value=Marca, width=30, state="readonly"),
+        "Garantia (meses)": tk.Entry(campos_frame, width=33),
+        "Peso (kg)": tk.Entry(campos_frame, width=33),
     }
 
     # Variável Tkinter para armazenar o ID do produto selecionado.

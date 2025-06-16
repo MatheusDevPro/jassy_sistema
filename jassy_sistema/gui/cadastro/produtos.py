@@ -185,8 +185,10 @@ def tela_produtos(janela):
     campos_frame = tk.Frame(frame, bg="#e6f2ff")
     campos_frame.pack(pady=10)
 
-    categorias = ["Alimentos", "Bebidas", "Higiene", "Limpeza", "Eletrônicos", "Roupas", "Outros"]
-    unidades = ["unidade", "litro", "kg", "metro", "caixa"]
+    categorias = ["Alimentos", "Bebidas", "Higiene", "Limpeza", "Eletrônicos", "Roupas", "Outros", "Ferramentas", "Móveis", "Brinquedos", "Saúde", "Beleza", "Esportes", "Automotivo", "Jardinagem", "Pet Shop", "Livros", "Papeleria", "Informática", "Construção Civil", "Construção e Reforma", "Saúde e Bem-Estar", "Moda e Acessórios", "Casa e Decoração"]
+    unidades = ["UN", "LT", "KG", "MT", "CX", "PCT", "BAG", "GAL", "ML", "G", "CM", "MM"]
+    localização_no_Estoque = ["Prateleira 1", "Prateleira 2", "Prateleira 3", "Prateleira 4",
+                             "Prateleira 5", "Prateleira 6", "Prateleira",]
 
     # Mapeamento dos campos para as entradas Tkinter
     campos = {
@@ -200,7 +202,7 @@ def tela_produtos(janela):
         "Descrição": tk.Entry(campos_frame, width=30),
         "Categoria": ttk.Combobox(campos_frame, values=categorias, width=28, state="readonly"),
         "Unidade de Medida": ttk.Combobox(campos_frame, values=unidades, width=28, state="readonly"),
-        "Localização no Estoque": tk.Entry(campos_frame, width=30),
+        "Localização no Estoque": ttk.Combobox(campos_frame, value=localização_no_Estoque, width=28, state="readonly"),
         "Marca": tk.Entry(campos_frame, width=30),
         "Garantia (meses)": tk.Entry(campos_frame, width=30),
         "Peso (kg)": tk.Entry(campos_frame, width=30),

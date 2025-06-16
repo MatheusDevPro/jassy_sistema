@@ -187,8 +187,7 @@ def tela_produtos(janela):
 
     categorias = ["Alimentos", "Bebidas", "Higiene", "Limpeza", "Eletrônicos", "Roupas", "Outros", "Ferramentas", "Móveis", "Brinquedos", "Saúde", "Beleza", "Esportes", "Automotivo", "Jardinagem", "Pet Shop", "Livros", "Papeleria", "Informática", "Construção Civil", "Construção e Reforma", "Saúde e Bem-Estar", "Moda e Acessórios", "Casa e Decoração"]
     unidades = ["UN", "LT", "KG", "MT", "CX", "PCT", "BAG", "GAL", "ML", "G", "CM", "MM"]
-    localização_no_Estoque = ["Prateleira 1", "Prateleira 2", "Prateleira 3", "Prateleira 4",
-                             "Prateleira 5", "Prateleira 6", "Prateleira",]
+    localização_no_Estoque = ["Prateleira 1", "Prateleira 2", "Prateleira 3", "Prateleira 4", "Prateleira 5", "Prateleira 6", "Prateleira 7",]
 
     # Mapeamento dos campos para as entradas Tkinter
     campos = {
